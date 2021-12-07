@@ -1,4 +1,22 @@
 ﻿Class AOCClass
+
+    Structure strucBoard
+        Public ID As Integer
+        Public grid(,) As Integer
+        Public marked(,) As Boolean
+        Public eliminated As Boolean
+    End Structure
+
+    Structure vector2
+        Public x As Int64
+        Public y As Int64
+    End Structure
+
+    Structure ray
+        Public startpoint As vector2
+        Public endpoint As vector2
+    End Structure
+
     Function day1(value As String, part As Int16) As UInt32
 
         Dim i As Int16
@@ -110,6 +128,536 @@
 
     End Function
 
+    Function day3(value As String, part As Int16) As Int64
+
+        Dim gammaBin As String, gammaInt As Int64
+        Dim epsilonBin As String, epsilonInt As Int64
+        Dim datapointsOGR As List(Of String)
+        Dim datapointsCOS As List(Of String)
+        Dim tempdata As List(Of String)
+
+        Dim totalRows As Int64, counts(0 To 11) As Int64, binLength As Int16
+        Dim goodChar As String
+
+        If part = 1 Then
+
+            stringreader = filereader.ReadLine()
+            binLength = Len(stringreader)
+            gammaBin = ""
+            epsilonBin = ""
+
+            Do While (Not stringreader Is Nothing)
+                totalRows = totalRows + 1
+                For i = 1 To binLength
+                    If Mid(stringreader, i, 1) = 1 Then
+                        counts(i - 1) = counts(i - 1) + 1
+                    End If
+                Next
+
+                stringreader = filereader.ReadLine()
+            Loop
+
+            For i = 1 To binLength
+                If counts(i - 1) > totalRows / 2 Then
+                    gammaBin = gammaBin & "1"
+                    epsilonBin = epsilonBin & "0"
+                Else
+                    gammaBin = gammaBin & "0"
+                    epsilonBin = epsilonBin & "1"
+                End If
+            Next
+
+            gammaInt = Bin2Dec(gammaBin)
+            epsilonInt = Bin2Dec(epsilonBin)
+
+            Debug.Print("GAMMA: " & gammaBin & " = " & gammaInt)
+            Debug.Print("EPSILON: " & epsilonBin & " = " & epsilonInt)
+
+            day3 = gammaInt * epsilonInt
+
+        Else
+
+            datapointsOGR = New List(Of String)
+            datapointsCOS = New List(Of String)
+            tempdata = New List(Of String)
+
+            stringreader = filereader.ReadLine()
+            binLength = Len(stringreader)
+
+            Do While (Not stringreader Is Nothing)
+                datapointsOGR.Add(stringreader)
+                datapointsCOS.Add(stringreader)
+
+                stringreader = filereader.ReadLine()
+            Loop
+
+            'find most common
+
+            For i = 1 To binLength
+
+                If datapointsOGR.Count > 1 Then
+
+                    counts(i - 1) = 0
+
+                    For Each datapoint In datapointsOGR
+                        If Mid(datapoint, i, 1) = 1 Then
+                            counts(i - 1) = counts(i - 1) + 1
+                        End If
+                    Next
+
+                    If counts(i - 1) >= datapointsOGR.Count / 2 Then
+                        goodChar = "1"
+                    Else
+                        goodChar = "0"
+                    End If
+
+                    For Each datapoint In datapointsOGR
+                        If Mid(datapoint, i, 1) = goodChar Then
+                            tempdata.Add(datapoint)
+                        End If
+                    Next
+
+                    datapointsOGR.Clear()
+                    datapointsOGR.AddRange(tempdata)
+                    tempdata.Clear()
+
+                End If
+
+                counts(i - 1) = 0
+
+                If datapointsCOS.Count > 1 Then
+
+                    For Each datapoint In datapointsCOS
+                        If Mid(datapoint, i, 1) = 1 Then
+                            counts(i - 1) = counts(i - 1) + 1
+                        End If
+                    Next
+
+                    If counts(i - 1) >= datapointsCOS.Count / 2 Then
+                        goodChar = "0"
+                    Else
+                        goodChar = "1"
+                    End If
+
+                    For Each datapoint In datapointsCOS
+                        If Mid(datapoint, i, 1) = goodChar Then
+                            tempdata.Add(datapoint)
+                        End If
+                    Next
+
+                    datapointsCOS.Clear()
+                    datapointsCOS.AddRange(tempdata)
+                    tempdata.Clear()
+
+                End If
+
+            Next
+
+            day3 = Bin2Dec(datapointsOGR(0)) * Bin2Dec(datapointsCOS(0))
+
+        End If
+
+    End Function
+
+    Function day4(value As String, part As Int16) As Int64
+
+        Dim answer As Int64
+        Dim boards As Dictionary(Of Int64, strucBoard), tempBoards As Dictionary(Of Int64, strucBoard)
+        Dim picks As List(Of Int64)
+        Dim r As Int16, c As Int16, spot As Int16
+        Dim board As New strucBoard
+        Dim foundOne As Boolean
+
+        ' read in pick values
+
+        boards = New Dictionary(Of Int64, strucBoard)
+        tempBoards = New Dictionary(Of Int64, strucBoard)
+        picks = New List(Of Int64)
+
+        stringreader = filereader.ReadLine()
+
+        ' parse pick values
+        Do Until Len(stringreader) = 0
+            spot = InStr(stringreader, ",")
+            If spot = 0 Then
+                picks.Add(Val(stringreader))
+                Exit Do
+            ElseIf spot = 1 Then
+                stringreader.Trim(",")
+            Else
+                picks.Add(Val(Left(stringreader, InStr(stringreader, ",") - 1)))
+                stringreader = Mid(stringreader, InStr(stringreader, ",") + 1, 1000)
+            End If
+        Loop
+
+        ' read in boards
+        Do
+            stringreader = filereader.ReadLine()
+            If stringreader Is Nothing Then
+                Exit Do
+            ElseIf stringreader = "" Then
+                board = New strucBoard
+                ReDim board.grid(4, 4)
+                ReDim board.marked(4, 4)
+                board.ID = boards.Count + 1
+                r = -1
+                c = 0
+            Else
+                r = r + 1
+                For c = 0 To 4
+                    board.grid(r, c) = Val(Mid(stringreader, c * 3 + 1, 2))
+
+                Next
+
+                If r = 4 Then
+                    boards.Add(board.ID, board)
+                End If
+
+            End If
+        Loop Until stringreader Is Nothing
+
+        If part = 1 Then
+
+            For Each pick In picks
+
+                For t = 1 To boards.Count
+                    board = boards.Item(t)
+                    For r = 0 To 4
+                        For c = 0 To 4
+                            If board.grid(r, c) = pick Then
+                                board.marked(r, c) = True
+                            End If
+                        Next
+                    Next
+
+                    If checkboard(board) Then
+                        answer = totalboard(board) * pick
+                        foundOne = True
+                        Exit For
+                    End If
+
+                Next
+
+                If foundOne Then Exit For
+
+            Next
+
+            day4 = answer
+        Else
+
+            For Each pick In picks
+
+                tempBoards = CloneDictionary(boards)
+
+                For Each Item In boards
+
+                    board = boards.Item(Item.Key)
+                    For r = 0 To 4
+                        For c = 0 To 4
+                            If board.grid(r, c) = pick Then
+                                board.marked(r, c) = True
+                            End If
+                        Next
+                    Next
+
+                    If checkboard(board) Then
+                        If boards.Count > 1 Then
+                            tempBoards.Remove(board.ID)
+                        Else
+                            answer = totalboard(board) * pick
+                            foundOne = True
+                            Exit For
+                        End If
+                    End If
+
+                Next
+
+                boards.Clear()
+                boards = CloneDictionary(tempBoards)
+
+                If foundOne Then Exit For
+
+            Next
+
+            day4 = answer
+
+        End If
+
+    End Function
+
+    Function day5(value As String, part As Int16) As Int64
+        Dim x1 As Int64, y1 As Int64, x2 As Int64, y2 As Int64, datapoint As ray, spot As Int16
+
+        Dim grid(1000, 1000) As Int16
+
+        Dim answer As Int64
+
+        If part = 1 Then
+
+            stringreader = filereader.ReadLine()
+
+            Do While (Not stringreader Is Nothing)
+                spot = InStr(stringreader, " -> ")
+                datapoint.startpoint = getxy(Left(stringreader, spot - 1))
+                datapoint.endpoint = getxy(Mid(stringreader, spot + 4, 10))
+
+                x1 = datapoint.startpoint.x
+                y1 = datapoint.startpoint.y
+                x2 = datapoint.endpoint.x
+                y2 = datapoint.endpoint.y
+
+                If x1 = x2 Then
+                    If y1 < y2 Then
+                        For y = y1 To y2
+                            grid(x1, y) = grid(x1, y) + 1
+                        Next
+                    Else
+                        For y = y1 To y2 Step -1
+                            grid(x1, y) = grid(x1, y) + 1
+                        Next
+                    End If
+                ElseIf y1 = y2 Then
+                    If x1 < x2 Then
+                        For x = x1 To x2
+                            grid(x, y1) = grid(x, y1) + 1
+                        Next
+                    Else
+                        For x = x1 To x2 Step -1
+                            grid(x, y1) = grid(x, y1) + 1
+                        Next
+                    End If
+                End If
+
+                stringreader = filereader.ReadLine()
+
+            Loop
+
+            For x = 0 To 1000
+                For y = 0 To 1000
+                    If grid(x, y) > 1 Then answer = answer + 1
+                Next
+            Next
+
+            day5 = answer
+        Else
+
+            Dim x As Int16, y As Int16
+
+            stringreader = filereader.ReadLine()
+
+            Do While (Not stringreader Is Nothing)
+
+                spot = InStr(stringreader, " -> ")
+                datapoint.startpoint = getxy(Left(stringreader, spot - 1))
+                datapoint.endpoint = getxy(Mid(stringreader, spot + 4, 10))
+
+                x1 = datapoint.startpoint.x
+                y1 = datapoint.startpoint.y
+                x2 = datapoint.endpoint.x
+                y2 = datapoint.endpoint.y
+
+                x = x1
+                y = y1
+
+                Do Until x = x2 And y = y2
+                    grid(x, y) = grid(x, y) + 1
+                    x = x + getAngle(x1, x2)
+                    y = y + getAngle(y1, y2)
+                Loop
+
+                grid(x, y) = grid(x, y) + 1
+
+                stringreader = filereader.ReadLine()
+
+            Loop
+
+            For x = 0 To 1000
+                For y = 0 To 1000
+                    If grid(x, y) > 1 Then answer = answer + 1
+                Next
+            Next
+
+            day5 = answer
+
+        End If
+    End Function
+
+    Function day6(value As String, part As Int16) As Int64
+
+        Dim answer As Int64
+        Dim fish As Int16
+        Dim fishes As List(Of Int16)
+        Dim newfishes As List(Of Int16)
+        Dim fishes2(0 To 8) As Int64
+        Dim newfishes2(0 To 8) As Int64
+        Dim spot As Int16
+
+        fishes = New List(Of Short)
+        newfishes = New List(Of Short)
+
+        stringreader = filereader.ReadLine()
+
+        Do Until Len(stringreader) = 0
+            spot = InStr(stringreader, ",")
+            If spot = 0 Then
+                fish = Val(stringreader)
+                fishes2(Val(stringreader)) = fishes2(Val(stringreader)) + 1
+                stringreader = ""
+            Else
+                fish = Val(Left(stringreader, spot - 1))
+                fishes2(Val(stringreader)) = fishes2(Val(stringreader)) + 1
+                stringreader = Right(stringreader, Len(stringreader) - spot)
+            End If
+
+            fishes.Add(fish)
+
+        Loop
+
+        If part = 1 Then
+
+            For c = 1 To 80
+                For f = 0 To fishes.Count - 1
+                    If fishes(f) = 0 Then
+                        fishes(f) = 6
+                        newfishes.Add(8)
+                    Else
+                        fishes(f) = fishes(f) - 1
+                    End If
+                Next
+
+                fishes.AddRange(newfishes)
+                newfishes.Clear()
+
+            Next
+
+            answer = fishes.Count
+
+            day6 = answer
+        Else
+            For c = 1 To 256
+
+                For f = 0 To 8
+                    Select Case f
+                        Case 0 To 5, 7
+                            newfishes2(f) = fishes2(f + 1)
+                        Case 6
+                            newfishes2(f) = fishes2(0) + fishes2(7)
+                        Case 8
+                            newfishes2(f) = fishes2(0)
+                    End Select
+                Next
+
+                fishes2 = newfishes2.Clone
+
+                answer = fishes2.Sum
+
+                Console.WriteLine("Day: " & c & "  Fishes: " & answer)
+
+            Next
+
+            day6 = answer
+
+        End If
+    End Function
+
+    Function dayx(value As String, part As Int16) As Int64
+
+
+        Dim a As Int64
+
+        If part = 1 Then
+
+            stringreader = filereader.ReadLine()
+
+            Do While (Not stringreader Is Nothing)
+
+
+
+                stringreader = filereader.ReadLine()
+
+            Loop
+
+            dayx = a
+        Else
+            stringreader = filereader.ReadLine()
+
+            Do While (Not stringreader Is Nothing)
+
+
+
+                stringreader = filereader.ReadLine()
+            Loop
+
+            dayx = a
+
+        End If
+    End Function
+
+    Function getxy(value As String) As vector2
+        Dim spot As Int16
+
+        spot = InStr(value, ",")
+
+        getxy.x = Val(Left(value, spot - 1))
+        getxy.y = Val(Mid(value, spot + 1, 100))
+
+    End Function
+
+    Function getAngle(v1 As Int64, v2 As Int64) As Integer
+        If v2 > v1 Then
+            getAngle = 1
+        ElseIf v2 < v1 Then
+            getAngle = -1
+        Else
+            getangle = 0
+        End If
+
+    End Function
+
+    Function checkboard(board As strucBoard) As Boolean
+
+        For r = 0 To 4
+            If board.marked(r, 0) And board.marked(r, 1) And board.marked(r, 2) And board.marked(r, 3) And board.marked(r, 4) Then
+                Return True
+            End If
+        Next
+
+        For c = 0 To 4
+            If board.marked(0, c) And board.marked(1, c) And board.marked(2, c) And board.marked(3, c) And board.marked(4, c) Then
+                Return True
+            End If
+        Next
+
+        Return False
+
+    End Function
+
+    Function totalboard(board As strucBoard) As Int64
+        Dim answer As Int64
+
+        For r = 0 To 4
+            For c = 0 To 4
+                If board.marked(r, c) = False Then
+                    answer = answer + board.grid(r, c)
+                End If
+            Next
+        Next
+
+        Return answer
+
+    End Function
+
+    Function CloneDictionary(Dict) As Dictionary(Of Int64, strucBoard)
+        Dim newDict As Dictionary(Of Int64, strucBoard)
+        newDict = New Dictionary(Of Int64, strucBoard)
+
+        For Each key In Dict.Keys
+            newDict.Add(key, Dict(key))
+        Next
+
+        CloneDictionary = newDict
+    End Function
+
 End Class
 
 Module Module1
@@ -124,7 +672,7 @@ Module Module1
 
     Sub Main()
 
-        day = 2
+        day = 6
         part = 2
         UseActual = False
         UseActual = True
@@ -139,53 +687,20 @@ Module Module1
 
         MsgBox(CallByName(AOCC, "day" & day, CallType.Method, dataFileName, part))
 
-        'Select Case day
-        '    Case 1
-        '        MsgBox(day1(dataFileName, part))
-        '    Case 2
-        '        MsgBox(day2(dataFileName, part))
-        '    Case 3
-        '        MsgBox(day2(dataFileName, part))
-        '    Case 4
-
-        '    Case 5
-
-        '    Case 6
-
-        '    Case 7
-
-        '    Case 8
-
-        '    Case 9
-
-        '    Case 10
-
-        '    Case 11
-        '    Case 12
-        '    Case 13
-        '    Case 14
-        '    Case 15
-        '    Case 16
-        '    Case 17
-        '    Case 18
-        '    Case 19
-        '    Case 20
-        '    Case 21
-        '    Case 22
-        '    Case 23
-        '    Case 24
-        '    Case 25
-        '    Case Else
-        '        MsgBox("day not in range")
-        'End Select
-
-
-
-
-
-
     End Sub
 
+    Function Bin2Dec(value As String) As Int64
+
+        Dim fact As Int64
+
+        For i = Len(value) To 1 Step -1
+            fact = Len(value) - i
+            Bin2Dec = Bin2Dec + Val(Mid(value, i, 1)) * 2 ^ fact
+        Next
+
+        Return Bin2Dec
+
+    End Function
 
 
 End Module
