@@ -560,10 +560,86 @@
         End If
     End Function
 
+    Function day7(value As String, part As Int16) As Int64
+
+        Dim crabs As List(Of Int16)
+        Dim crab As Int16, spot As Int16, rollingSum As Int64
+        Dim minGuess As Int16, maxGuess As Int16, curGuess As Int16
+        Dim fuelcost_new As Int64, fuelcost_old As Int64
+        Dim goless As Boolean
+
+        Dim answer As Int64
+
+        stringreader = filereader.ReadLine()
+
+        crabs = New List(Of Short)
+
+        Do Until Len(stringreader) = 0
+            spot = InStr(stringreader, ",")
+            If spot = 0 Then
+                crab = Val(stringreader)
+
+                stringreader = ""
+            Else
+                crab = Val(Left(stringreader, spot - 1))
+                stringreader = Right(stringreader, Len(stringreader) - spot)
+            End If
+
+            If crab > maxGuess Then maxGuess = crab
+            If crab < minGuess Then minGuess = crab
+
+            rollingSum = rollingSum + crab
+            crabs.Add(crab)
+
+        Loop
+
+        If part = 1 Then
+
+            'curGuess = (minGuess + maxGuess) / 2
+
+            fuelcost_old = 100000000
+
+            For i = minGuess To maxGuess
+
+                fuelcost_new = calcFuelCost(i, crabs)
+
+                If fuelcost_new > fuelcost_old Then
+                    answer = fuelcost_old
+                    Exit For
+                Else
+                    fuelcost_old = fuelcost_new
+                End If
+
+            Next
+
+
+
+            day7 = answer
+        Else
+
+            fuelcost_old = 10000000000000
+
+            For i = minGuess To maxGuess
+
+                fuelcost_new = calcFuelCost2(i, crabs)
+
+                If fuelcost_new > fuelcost_old Then
+                    answer = fuelcost_old
+                    Exit For
+                Else
+                    fuelcost_old = fuelcost_new
+                End If
+
+            Next
+
+            day7 = answer
+
+        End If
+    End Function
     Function dayx(value As String, part As Int16) As Int64
 
 
-        Dim a As Int64
+        Dim answer As Int64
 
         If part = 1 Then
 
@@ -577,7 +653,7 @@
 
             Loop
 
-            dayx = a
+            dayx = answer
         Else
             stringreader = filereader.ReadLine()
 
@@ -588,7 +664,7 @@
                 stringreader = filereader.ReadLine()
             Loop
 
-            dayx = a
+            dayx = answer
 
         End If
     End Function
@@ -658,6 +734,37 @@
         CloneDictionary = newDict
     End Function
 
+    Function calcFuelCost(pos As Int16, creatures As List(Of Int16)) As Int64
+
+        Dim cost As Int64
+
+        For i = 0 To creatures.Count - 1
+
+            cost = cost + Math.Abs(pos - creatures(i))
+
+        Next
+
+        calcFuelCost = cost
+
+    End Function
+    Function calcFuelCost2(pos As Int16, creatures As List(Of Int16)) As Int64
+
+        Dim cost As Int64, differ As Int64
+
+        For i = 0 To creatures.Count - 1
+
+            differ = Math.Abs(pos - creatures(i))
+
+            For t = 0 To differ
+                cost = cost + t
+            Next
+
+        Next
+
+        calcFuelCost2 = cost
+
+    End Function
+
 End Class
 
 Module Module1
@@ -672,7 +779,7 @@ Module Module1
 
     Sub Main()
 
-        day = 6
+        day = 7
         part = 2
         UseActual = False
         UseActual = True
