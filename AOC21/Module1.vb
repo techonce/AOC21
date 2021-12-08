@@ -1,5 +1,4 @@
 ﻿Class AOCClass
-
     Structure strucBoard
         Public ID As Integer
         Public grid(,) As Integer
@@ -564,9 +563,8 @@
 
         Dim crabs As List(Of Int16)
         Dim crab As Int16, spot As Int16, rollingSum As Int64
-        Dim minGuess As Int16, maxGuess As Int16, curGuess As Int16
+        Dim minGuess As Int16, maxGuess As Int16
         Dim fuelcost_new As Int64, fuelcost_old As Int64
-        Dim goless As Boolean
 
         Dim answer As Int64
 
@@ -636,6 +634,199 @@
 
         End If
     End Function
+
+    Function day8(value As String, part As Int16) As Int64
+
+        Dim answer As Int64, spot As Int16, strlen As Int16
+        Dim inputDigits(9) As String, outputDigits(3) As String, inputString As String, outputString As String
+        Dim inputSolved(9) As Boolean
+        Dim stringValue(9) As String, inputValue(9) As Int16
+        Dim currentString As String
+        Dim c As Int16, temp_answer As Int16
+
+        If part = 1 Then
+
+            stringreader = filereader.ReadLine()
+
+            Do While (Not stringreader Is Nothing)
+
+                spot = InStr(stringreader, "|") + 2
+
+                stringreader = Mid(stringreader, spot, 100)
+
+                Do Until Len(stringreader) = 0
+                    spot = InStr(stringreader, " ")
+                    If spot = 0 Then
+                        strlen = Len(stringreader)
+
+                        stringreader = ""
+                    Else
+                        strlen = spot - 1
+                        stringreader = Right(stringreader, Len(stringreader) - spot)
+                    End If
+
+                    Select Case strlen
+                        Case 2, 3, 4, 7
+                            answer = answer + 1
+                    End Select
+
+                Loop
+
+                stringreader = filereader.ReadLine()
+
+            Loop
+
+            day8 = answer
+        Else
+            stringreader = filereader.ReadLine()
+
+            Do While (Not stringreader Is Nothing)
+
+                ReDim inputDigits(9)
+                ReDim outputDigits(3)
+                ReDim inputSolved(9)
+                ReDim stringValue(9)
+                ReDim inputValue(9)
+
+                c = 0
+                spot = InStr(stringreader, "|")
+
+                inputString = Left(stringreader, spot - 2)
+                outputString = Mid(stringreader, spot + 2, 100)
+
+                Do Until Len(inputString) = 0
+                    spot = InStr(inputString, " ")
+                    If spot = 0 Then
+                        inputDigits(c) = inputString
+                        inputString = ""
+                    Else
+                        inputDigits(c) = Left(inputString, spot - 1)
+                        inputString = (Right(inputString, Len(inputString) - spot))
+                    End If
+
+                    currentString = inputDigits(c)
+
+                    Select Case Len(currentString) ' Find 1,4,7,8
+                        Case 2 ' Value is 1
+                            stringValue(1) = currentString
+                            inputValue(c) = 1
+                            inputSolved(c) = True
+                        Case 3 ' Value is 7
+                            stringValue(7) = currentString
+                            inputValue(c) = 7
+                            inputSolved(c) = True
+                        Case 4 ' Value is 4
+                            stringValue(4) = currentString
+                            inputValue(c) = 4
+                            inputSolved(c) = True
+                        Case 7 ' Value is 8
+                            stringValue(8) = currentString
+                            inputValue(c) = 8
+                            inputSolved(c) = True
+                    End Select
+                    c = c + 1
+                Loop
+
+                stringreader = filereader.ReadLine()
+
+                ' len 2 = 1
+                ' len 3 = 7
+                ' len 4 = 4
+                ' len 5 = 2,3,5
+                ' len 6 = 0,6,9
+                ' len 7 = 8
+
+                For t = 0 To 9 ' find 3, 9, 6, 0
+                    If inputSolved(t) = False Then
+
+                        currentString = inputDigits(t)
+
+                        If Len(currentString) = 5 Then
+                            If IsSubset(currentString, stringValue(1)) Then ' find 3
+                                stringValue(3) = currentString
+                                inputValue(t) = 3
+                                inputSolved(t) = True
+                            End If
+                        End If
+
+                        If Len(currentString) = 6 Then
+                            If IsSubset(currentString, stringValue(4)) Then ' find 9
+                                stringValue(9) = currentString
+                                inputValue(t) = 9
+                                inputSolved(t) = True
+                            ElseIf Not (IsSubset(currentString, stringValue(1))) Then ' find 6
+                                stringValue(6) = currentString
+                                inputValue(t) = 6
+                                inputSolved(t) = True
+                            Else ' find 0
+                                stringValue(0) = currentString
+                                inputValue(t) = 0
+                                inputSolved(t) = True
+                            End If
+
+                        End If
+
+                    End If
+
+                Next
+
+                For t = 0 To 9 ' find 2, 5
+                    If inputSolved(t) = False Then
+
+                        currentString = inputDigits(t)
+
+                        If IsSubset(stringValue(6), currentString) Then ' find 5
+                            stringValue(5) = currentString
+                            inputValue(t) = 5
+                            inputSolved(t) = True
+                        Else ' find 2
+                            stringValue(2) = currentString
+                            inputValue(t) = 2
+                            inputSolved(t) = True
+                        End If
+
+                    End If
+
+                Next
+
+                ' calculate output
+
+                c = 0
+
+                Do Until Len(outputString) = 0
+                    spot = InStr(outputString, " ")
+                    If spot = 0 Then
+                        outputDigits(c) = outputString
+                        outputString = ""
+                    Else
+                        outputDigits(c) = Left(outputString, spot - 1)
+                        outputString = (Right(outputString, Len(outputString) - spot))
+                        c = c + 1
+                    End If
+                Loop
+
+                temp_answer = 0
+
+                For t = 0 To 3
+
+                    For u = 0 To 9
+                        If sortString(outputDigits(t)) = sortString(stringValue(u)) Then
+                            temp_answer = temp_answer + u * 10 ^ (3 - t)
+                            Exit For
+                        End If
+                    Next
+
+                Next
+
+                answer = answer + temp_answer
+
+            Loop
+
+            day8 = answer
+
+        End If
+    End Function
+
     Function dayx(value As String, part As Int16) As Int64
 
 
@@ -765,6 +956,38 @@
 
     End Function
 
+    Function sortString(value As String) As String
+
+        Dim chars() = value.ToArray
+
+        If Len(value) = 0 Then
+            Return ""
+        ElseIf Len(value) = 1 Then
+            Return value
+        Else
+
+            Array.Sort(chars)
+
+            Dim temp As New String(chars)
+
+            Return temp
+
+        End If
+
+    End Function
+
+    Function IsSubset(value As String, subset As String) As Boolean
+
+        For t = 1 To Len(subset)
+            If value.Contains(Mid(subset, t, 1)) = False Then
+                Return False
+            End If
+        Next
+
+        Return True
+
+    End Function
+
 End Class
 
 Module Module1
@@ -779,7 +1002,7 @@ Module Module1
 
     Sub Main()
 
-        day = 7
+        day = 8
         part = 2
         UseActual = False
         UseActual = True
