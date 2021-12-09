@@ -1,7 +1,6 @@
 ﻿
 Module Module1
-
-    Dim AOCC As New AOCClass
+    ReadOnly AOCC As New AOCClass
     Public filereader As System.IO.StreamReader
     Public stringreader As String
     Dim day As Int16
@@ -14,7 +13,7 @@ Module Module1
         day = 9
         part = 2
         UseActual = False
-        'UseActual = True
+        UseActual = True
 
         If UseActual Then
             dataFileName = "C:\Users\jyani\source\repos\AOC21\AOC21\data_" & day & ".txt"
@@ -24,7 +23,9 @@ Module Module1
 
         filereader = My.Computer.FileSystem.OpenTextFileReader(dataFileName)
 
-        MsgBox(CallByName(AOCC, "day" & day, CallType.Method, dataFileName, part))
+        MsgBox(CallByName(AOCC, "Day" & day, CallType.Method, part))
+
+        filereader.Close()
 
     End Sub
 
@@ -34,7 +35,7 @@ Module Module1
 
         For i = Len(value) To 1 Step -1
             fact = Len(value) - i
-            Bin2Dec = Bin2Dec + Val(Mid(value, i, 1)) * 2 ^ fact
+            Bin2Dec += Val(Mid(value, i, 1)) * 2 ^ fact
         Next
 
         Return Bin2Dec

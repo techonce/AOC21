@@ -1,22 +1,24 @@
 ﻿Class AOCClass
-    Structure strucBoard
+    Public basins(1000) As Integer
+
+    Structure StrucBoard
         Public ID As Integer
         Public grid(,) As Integer
         Public marked(,) As Boolean
         Public eliminated As Boolean
     End Structure
 
-    Structure vector2
+    Structure Vector2
         Public x As Int64
         Public y As Int64
     End Structure
 
-    Structure ray
-        Public startpoint As vector2
-        Public endpoint As vector2
+    Structure Ray
+        Public startpoint As Vector2
+        Public endpoint As Vector2
     End Structure
 
-    Function day1(value As String, part As Int16) As UInt32
+    Function Day1(part As Int16) As UInt32
 
         Dim i As Int16
         Dim lastdepth As Int16
@@ -30,8 +32,8 @@
             lastdepth = Val(stringreader)
             curDepth = lastdepth
 
-            Do While (Not stringreader Is Nothing)
-                If curDepth > lastdepth Then incCount = incCount + 1
+            Do While (stringreader IsNot Nothing)
+                If curDepth > lastdepth Then incCount += 1
 
                 lastdepth = curDepth
                 stringreader = filereader.ReadLine()
@@ -46,10 +48,10 @@
             reading(2) = Val(stringreader)
             stringreader = filereader.ReadLine()
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
 
                 reading(3) = Val(stringreader)
-                If reading(3) > reading(0) Then incCount = incCount + 1
+                If reading(3) > reading(0) Then incCount += 1
 
                 For i = 0 To 2
                     reading(i) = reading(i + 1)
@@ -60,11 +62,11 @@
 
         End If
 
-        day1 = incCount
+        Day1 = incCount
 
     End Function
 
-    Function day2(value As String, part As Int16) As Int64
+    Function Day2(part As Int16) As Int64
         Dim depth As Int64
         Dim posX As Int64
         Dim direction As String, amount As Int16, spaceLocation As Int16
@@ -74,7 +76,7 @@
 
             stringreader = filereader.ReadLine()
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
 
                 spaceLocation = InStr(stringreader, " ")
                 direction = Left(stringreader, spaceLocation - 1)
@@ -82,24 +84,24 @@
 
                 Select Case direction
                     Case "forward"
-                        posX = posX + amount
+                        posX += amount
                     Case "up"
-                        depth = depth - amount
+                        depth -= amount
                         If depth < 0 Then depth = 0
                     Case "down"
-                        depth = depth + amount
+                        depth += amount
                 End Select
 
                 stringreader = filereader.ReadLine()
             Loop
 
-            day2 = depth * posX
+            Day2 = depth * posX
 
         Else
 
             stringreader = filereader.ReadLine()
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
 
                 spaceLocation = InStr(stringreader, " ")
                 direction = Left(stringreader, spaceLocation - 1)
@@ -107,12 +109,12 @@
 
                 Select Case direction
                     Case "forward"
-                        posX = posX + amount
-                        depth = depth + amount * aim
+                        posX += amount
+                        depth += amount * aim
                     Case "up"
-                        aim = aim - amount
+                        aim -= amount
                     Case "down"
-                        aim = aim + amount
+                        aim += amount
                 End Select
 
                 Debug.Print(posX & "  " & aim & "  " & depth)
@@ -120,14 +122,14 @@
                 stringreader = filereader.ReadLine()
             Loop
 
-            day2 = depth * posX
+            Day2 = depth * posX
 
         End If
 
 
     End Function
 
-    Function day3(value As String, part As Int16) As Int64
+    Function Day3(part As Int16) As Int64
 
         Dim gammaBin As String, gammaInt As Int64
         Dim epsilonBin As String, epsilonInt As Int64
@@ -145,8 +147,8 @@
             gammaBin = ""
             epsilonBin = ""
 
-            Do While (Not stringreader Is Nothing)
-                totalRows = totalRows + 1
+            Do While (stringreader IsNot Nothing)
+                totalRows += 1
                 For i = 1 To binLength
                     If Mid(stringreader, i, 1) = 1 Then
                         counts(i - 1) = counts(i - 1) + 1
@@ -158,11 +160,11 @@
 
             For i = 1 To binLength
                 If counts(i - 1) > totalRows / 2 Then
-                    gammaBin = gammaBin & "1"
-                    epsilonBin = epsilonBin & "0"
+                    gammaBin &= "1"
+                    epsilonBin &= "0"
                 Else
-                    gammaBin = gammaBin & "0"
-                    epsilonBin = epsilonBin & "1"
+                    gammaBin &= "0"
+                    epsilonBin &= "1"
                 End If
             Next
 
@@ -172,7 +174,7 @@
             Debug.Print("GAMMA: " & gammaBin & " = " & gammaInt)
             Debug.Print("EPSILON: " & epsilonBin & " = " & epsilonInt)
 
-            day3 = gammaInt * epsilonInt
+            Day3 = gammaInt * epsilonInt
 
         Else
 
@@ -183,7 +185,7 @@
             stringreader = filereader.ReadLine()
             binLength = Len(stringreader)
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
                 datapointsOGR.Add(stringreader)
                 datapointsCOS.Add(stringreader)
 
@@ -252,25 +254,25 @@
 
             Next
 
-            day3 = Bin2Dec(datapointsOGR(0)) * Bin2Dec(datapointsCOS(0))
+            Day3 = Bin2Dec(datapointsOGR(0)) * Bin2Dec(datapointsCOS(0))
 
         End If
 
     End Function
 
-    Function day4(value As String, part As Int16) As Int64
+    Function Day4(part As Int16) As Int64
 
         Dim answer As Int64
-        Dim boards As Dictionary(Of Int64, strucBoard), tempBoards As Dictionary(Of Int64, strucBoard)
+        Dim boards As Dictionary(Of Int64, StrucBoard), tempBoards As Dictionary(Of Int64, StrucBoard)
         Dim picks As List(Of Int64)
         Dim r As Int16, c As Int16, spot As Int16
-        Dim board As New strucBoard
+        Dim board As New StrucBoard
         Dim foundOne As Boolean
 
         ' read in pick values
 
-        boards = New Dictionary(Of Int64, strucBoard)
-        tempBoards = New Dictionary(Of Int64, strucBoard)
+        boards = New Dictionary(Of Int64, StrucBoard)
+        tempBoards = New Dictionary(Of Int64, StrucBoard)
         picks = New List(Of Int64)
 
         stringreader = filereader.ReadLine()
@@ -295,17 +297,16 @@
             If stringreader Is Nothing Then
                 Exit Do
             ElseIf stringreader = "" Then
-                board = New strucBoard
+                board = New StrucBoard
                 ReDim board.grid(4, 4)
                 ReDim board.marked(4, 4)
                 board.ID = boards.Count + 1
                 r = -1
                 c = 0
             Else
-                r = r + 1
+                r += 1
                 For c = 0 To 4
                     board.grid(r, c) = Val(Mid(stringreader, c * 3 + 1, 2))
-
                 Next
 
                 If r = 4 Then
@@ -329,8 +330,8 @@
                         Next
                     Next
 
-                    If checkboard(board) Then
-                        answer = totalboard(board) * pick
+                    If Checkboard(board) Then
+                        answer = Totalboard(board) * pick
                         foundOne = True
                         Exit For
                     End If
@@ -341,7 +342,7 @@
 
             Next
 
-            day4 = answer
+            Day4 = answer
         Else
 
             For Each pick In picks
@@ -359,11 +360,11 @@
                         Next
                     Next
 
-                    If checkboard(board) Then
+                    If Checkboard(board) Then
                         If boards.Count > 1 Then
                             tempBoards.Remove(board.ID)
                         Else
-                            answer = totalboard(board) * pick
+                            answer = Totalboard(board) * pick
                             foundOne = True
                             Exit For
                         End If
@@ -378,14 +379,14 @@
 
             Next
 
-            day4 = answer
+            Day4 = answer
 
         End If
 
     End Function
 
-    Function day5(value As String, part As Int16) As Int64
-        Dim x1 As Int64, y1 As Int64, x2 As Int64, y2 As Int64, datapoint As ray, spot As Int16
+    Function Day5(part As Int16) As Int64
+        Dim x1 As Int64, y1 As Int64, x2 As Int64, y2 As Int64, datapoint As Ray, spot As Int16
 
         Dim grid(1000, 1000) As Int16
 
@@ -395,10 +396,10 @@
 
             stringreader = filereader.ReadLine()
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
                 spot = InStr(stringreader, " -> ")
-                datapoint.startpoint = getxy(Left(stringreader, spot - 1))
-                datapoint.endpoint = getxy(Mid(stringreader, spot + 4, 10))
+                datapoint.startpoint = Getxy(Left(stringreader, spot - 1))
+                datapoint.endpoint = Getxy(Mid(stringreader, spot + 4, 10))
 
                 x1 = datapoint.startpoint.x
                 y1 = datapoint.startpoint.y
@@ -433,22 +434,22 @@
 
             For x = 0 To 1000
                 For y = 0 To 1000
-                    If grid(x, y) > 1 Then answer = answer + 1
+                    If grid(x, y) > 1 Then answer += 1
                 Next
             Next
 
-            day5 = answer
+            Day5 = answer
         Else
 
             Dim x As Int16, y As Int16
 
             stringreader = filereader.ReadLine()
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
 
                 spot = InStr(stringreader, " -> ")
-                datapoint.startpoint = getxy(Left(stringreader, spot - 1))
-                datapoint.endpoint = getxy(Mid(stringreader, spot + 4, 10))
+                datapoint.startpoint = Getxy(Left(stringreader, spot - 1))
+                datapoint.endpoint = Getxy(Mid(stringreader, spot + 4, 10))
 
                 x1 = datapoint.startpoint.x
                 y1 = datapoint.startpoint.y
@@ -460,8 +461,8 @@
 
                 Do Until x = x2 And y = y2
                     grid(x, y) = grid(x, y) + 1
-                    x = x + getAngle(x1, x2)
-                    y = y + getAngle(y1, y2)
+                    x += GetAngle(x1, x2)
+                    y += GetAngle(y1, y2)
                 Loop
 
                 grid(x, y) = grid(x, y) + 1
@@ -472,16 +473,16 @@
 
             For x = 0 To 1000
                 For y = 0 To 1000
-                    If grid(x, y) > 1 Then answer = answer + 1
+                    If grid(x, y) > 1 Then answer += 1
                 Next
             Next
 
-            day5 = answer
+            Day5 = answer
 
         End If
     End Function
 
-    Function day6(value As String, part As Int16) As Int64
+    Function Day6(part As Int16) As Int64
 
         Dim answer As Int64
         Dim fish As Int16
@@ -531,7 +532,7 @@
 
             answer = fishes.Count
 
-            day6 = answer
+            Day6 = answer
         Else
             For c = 1 To 256
 
@@ -554,12 +555,12 @@
 
             Next
 
-            day6 = answer
+            Day6 = answer
 
         End If
     End Function
 
-    Function day7(value As String, part As Int16) As Int64
+    Function Day7(part As Int16) As Int64
 
         Dim crabs As List(Of Int16)
         Dim crab As Int16, spot As Int16, rollingSum As Int64
@@ -586,7 +587,7 @@
             If crab > maxGuess Then maxGuess = crab
             If crab < minGuess Then minGuess = crab
 
-            rollingSum = rollingSum + crab
+            rollingSum += crab
             crabs.Add(crab)
 
         Loop
@@ -599,7 +600,7 @@
 
             For i = minGuess To maxGuess
 
-                fuelcost_new = calcFuelCost(i, crabs)
+                fuelcost_new = CalcFuelCost(i, crabs)
 
                 If fuelcost_new > fuelcost_old Then
                     answer = fuelcost_old
@@ -610,16 +611,14 @@
 
             Next
 
-
-
-            day7 = answer
+            Day7 = answer
         Else
 
             fuelcost_old = 10000000000000
 
             For i = minGuess To maxGuess
 
-                fuelcost_new = calcFuelCost2(i, crabs)
+                fuelcost_new = CalcFuelCost2(i, crabs)
 
                 If fuelcost_new > fuelcost_old Then
                     answer = fuelcost_old
@@ -630,12 +629,12 @@
 
             Next
 
-            day7 = answer
+            Day7 = answer
 
         End If
     End Function
 
-    Function day8(value As String, part As Int16) As Int64
+    Function Day8(part As Int16) As Int64
 
         Dim answer As Int64, spot As Int16, strlen As Int16
         Dim inputDigits(9) As String, outputDigits(3) As String, inputString As String, outputString As String
@@ -648,7 +647,7 @@
 
             stringreader = filereader.ReadLine()
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
 
                 spot = InStr(stringreader, "|") + 2
 
@@ -667,7 +666,7 @@
 
                     Select Case strlen
                         Case 2, 3, 4, 7
-                            answer = answer + 1
+                            answer += 1
                     End Select
 
                 Loop
@@ -676,11 +675,11 @@
 
             Loop
 
-            day8 = answer
+            Day8 = answer
         Else
             stringreader = filereader.ReadLine()
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
 
                 ReDim inputDigits(9)
                 ReDim outputDigits(3)
@@ -724,7 +723,7 @@
                             inputValue(c) = 8
                             inputSolved(c) = True
                     End Select
-                    c = c + 1
+                    c += 1
                 Loop
 
                 stringreader = filereader.ReadLine()
@@ -801,7 +800,7 @@
                     Else
                         outputDigits(c) = Left(outputString, spot - 1)
                         outputString = (Right(outputString, Len(outputString) - spot))
-                        c = c + 1
+                        c += 1
                     End If
                 Loop
 
@@ -810,24 +809,153 @@
                 For t = 0 To 3
 
                     For u = 0 To 9
-                        If sortString(outputDigits(t)) = sortString(stringValue(u)) Then
-                            temp_answer = temp_answer + u * 10 ^ (3 - t)
+                        If SortString(outputDigits(t)) = SortString(stringValue(u)) Then
+                            temp_answer += u * 10 ^ (3 - t)
                             Exit For
                         End If
                     Next
 
                 Next
 
-                answer = answer + temp_answer
+                answer += temp_answer
 
             Loop
 
-            day8 = answer
+            Day8 = answer
 
         End If
     End Function
 
-    Function day9(value As String, part As Int16) As Int64
+    Function Day9(part As Int16) As Int64
+
+        Dim grid(,) As Integer, r As Integer, c As Integer, gridWidth As Integer, gridHeight As Integer
+        Dim inputStrings(1000) As String
+        Dim IsLow(,) As Boolean, currentBasin As Integer
+
+
+        Dim answer As Int64
+
+        stringreader = filereader.ReadLine()
+        gridWidth = Len(stringreader) - 1
+        r = 0
+
+        Do While (stringreader IsNot Nothing)
+
+            inputStrings(r) = stringreader
+
+            r = r + 1
+
+            stringreader = filereader.ReadLine()
+
+        Loop
+
+        gridHeight = r - 1
+        ReDim Preserve inputStrings(gridHeight)
+        ReDim grid(gridHeight, gridWidth)
+        ReDim IsLow(gridHeight, gridWidth)
+
+        If part = 1 Then
+
+            For r = 0 To gridHeight
+                For c = 0 To gridWidth
+                    grid(r, c) = Val(Mid(inputStrings(r), c + 1, 1))
+                    IsLow(r, c) = True
+                Next
+            Next
+
+            For r = 0 To gridHeight
+                For c = 0 To gridWidth
+                    Select Case c
+                        Case 0
+                            Select Case r
+                                Case 0
+                                    If grid(r + 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c + 1) <= grid(r, c) Then IsLow(r, c) = False
+                                Case 1 To gridHeight - 1
+                                    If grid(r + 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r - 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c + 1) <= grid(r, c) Then IsLow(r, c) = False
+                                Case gridHeight
+                                    If grid(r - 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c + 1) <= grid(r, c) Then IsLow(r, c) = False
+                            End Select
+                        Case 1 To gridWidth - 1
+                            Select Case r
+                                Case 0
+                                    If grid(r + 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c + 1) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c - 1) <= grid(r, c) Then IsLow(r, c) = False
+                                Case 1 To gridHeight - 1
+                                    If grid(r + 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r - 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c + 1) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c - 1) <= grid(r, c) Then IsLow(r, c) = False
+                                Case gridHeight
+                                    If grid(r - 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c + 1) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c - 1) <= grid(r, c) Then IsLow(r, c) = False
+                            End Select
+                        Case gridWidth
+                            Select Case r
+                                Case 0
+                                    If grid(r + 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c - 1) <= grid(r, c) Then IsLow(r, c) = False
+                                Case 1 To gridHeight - 1
+                                    If grid(r + 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r - 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c - 1) <= grid(r, c) Then IsLow(r, c) = False
+                                Case gridHeight
+                                    If grid(r - 1, c) <= grid(r, c) Then IsLow(r, c) = False
+                                    If grid(r, c - 1) <= grid(r, c) Then IsLow(r, c) = False
+                            End Select
+
+                    End Select
+
+                    If IsLow(r, c) Then answer += 1 + grid(r, c)
+                Next
+            Next
+
+
+            Day9 = answer
+        Else
+
+            Dim temp As Integer
+
+            currentBasin = 0
+
+            For r = 0 To gridHeight
+                For c = 0 To gridWidth
+                    temp = Val(Mid(inputStrings(r), c + 1, 1))
+                    If temp = 9 Then grid(r, c) = -1 Else grid(r, c) = 0
+                Next
+            Next
+
+            For r = 0 To gridHeight
+                For c = 0 To gridWidth
+
+                    If grid(r, c) = 0 Then
+
+                        currentBasin += 1
+
+                        CheckNeighbors(grid, r, c, currentBasin)
+
+                    End If
+
+                Next
+            Next
+
+            Array.Sort(basins)
+            Array.Reverse(basins)
+
+            answer = basins(0) * basins(1) * basins(2)
+
+            Day9 = answer
+
+        End If
+    End Function
+
+
+    Function Dayx(part As Int16) As Int64
 
 
         Dim answer As Int64
@@ -836,7 +964,7 @@
 
             stringreader = filereader.ReadLine()
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
 
 
 
@@ -844,81 +972,82 @@
 
             Loop
 
-            day9 = answer
+            Dayx = answer
         Else
             stringreader = filereader.ReadLine()
 
-            Do While (Not stringreader Is Nothing)
+            Do While (stringreader IsNot Nothing)
 
 
 
                 stringreader = filereader.ReadLine()
             Loop
 
-            day9 = answer
+            Dayx = answer
 
         End If
     End Function
 
 
-    Function dayx(value As String, part As Int16) As Int64
+    ' *************  Put all real Functions Below this line
 
+    Sub CheckNeighbors(ByRef grid(,) As Integer, r As Integer, c As Integer, currentbasin As Integer)
 
-        Dim answer As Int64
+        grid(r, c) = currentbasin
+        basins(currentbasin) += 1
 
-        If part = 1 Then
-
-            stringreader = filereader.ReadLine()
-
-            Do While (Not stringreader Is Nothing)
-
-
-
-                stringreader = filereader.ReadLine()
-
-            Loop
-
-            dayx = answer
-        Else
-            stringreader = filereader.ReadLine()
-
-            Do While (Not stringreader Is Nothing)
-
-
-
-                stringreader = filereader.ReadLine()
-            Loop
-
-            dayx = answer
-
+        'check north
+        If r > 0 Then
+            If grid(r - 1, c) = 0 Then
+                CheckNeighbors(grid, r - 1, c, currentbasin)
+            End If
         End If
-    End Function
 
+        'Check east
+        If c < UBound(grid, 2) Then
+            If grid(r, c + 1) = 0 Then
+                CheckNeighbors(grid, r, c + 1, currentbasin)
+            End If
+        End If
 
+        'check south
+        If r < UBound(grid, 1) Then
+            If grid(r + 1, c) = 0 Then
+                CheckNeighbors(grid, r + 1, c, currentbasin)
+            End If
+        End If
 
+        'check west
+        If c > 0 Then
+            If grid(r, c - 1) = 0 Then
+                CheckNeighbors(grid, r, c - 1, currentbasin)
+            End If
+        End If
 
-    Function getxy(value As String) As vector2
+    End Sub
+
+    Function Getxy(value As String) As Vector2
         Dim spot As Int16
 
         spot = InStr(value, ",")
 
-        getxy.x = Val(Left(value, spot - 1))
-        getxy.y = Val(Mid(value, spot + 1, 100))
+        Getxy.x = Val(Left(value, spot - 1))
+        Getxy.y = Val(Mid(value, spot + 1, 100))
 
     End Function
 
-    Function getAngle(v1 As Int64, v2 As Int64) As Integer
+    Function GetAngle(v1 As Int64, v2 As Int64) As Integer
         If v2 > v1 Then
-            getAngle = 1
+            GetAngle = 1
         ElseIf v2 < v1 Then
-            getAngle = -1
+            GetAngle = -1
         Else
-            getAngle = 0
+            GetAngle = 0
         End If
 
     End Function
 
-    Function checkboard(board As strucBoard) As Boolean
+    Function Checkboard(board As StrucBoard) As Boolean
 
         For r = 0 To 4
             If board.marked(r, 0) And board.marked(r, 1) And board.marked(r, 2) And board.marked(r, 3) And board.marked(r, 4) Then
@@ -936,13 +1065,13 @@
 
     End Function
 
-    Function totalboard(board As strucBoard) As Int64
+    Function Totalboard(board As StrucBoard) As Int64
         Dim answer As Int64
 
         For r = 0 To 4
             For c = 0 To 4
                 If board.marked(r, c) = False Then
-                    answer = answer + board.grid(r, c)
+                    answer += board.grid(r, c)
                 End If
             Next
         Next
@@ -951,9 +1080,9 @@
 
     End Function
 
-    Function CloneDictionary(Dict) As Dictionary(Of Int64, strucBoard)
-        Dim newDict As Dictionary(Of Int64, strucBoard)
-        newDict = New Dictionary(Of Int64, strucBoard)
+    Function CloneDictionary(Dict) As Dictionary(Of Int64, StrucBoard)
+        Dim newDict As Dictionary(Of Int64, StrucBoard)
+        newDict = New Dictionary(Of Int64, StrucBoard)
 
         For Each key In Dict.Keys
             newDict.Add(key, Dict(key))
@@ -962,20 +1091,21 @@
         CloneDictionary = newDict
     End Function
 
-    Function calcFuelCost(pos As Int16, creatures As List(Of Int16)) As Int64
+    Function CalcFuelCost(pos As Int16, creatures As List(Of Int16)) As Int64
 
         Dim cost As Int64
 
         For i = 0 To creatures.Count - 1
 
-            cost = cost + Math.Abs(pos - creatures(i))
+            cost += Math.Abs(pos - creatures(i))
 
         Next
 
-        calcFuelCost = cost
+        CalcFuelCost = cost
 
     End Function
-    Function calcFuelCost2(pos As Int16, creatures As List(Of Int16)) As Int64
+
+    Function CalcFuelCost2(pos As Int16, creatures As List(Of Int16)) As Int64
 
         Dim cost As Int64, differ As Int64
 
@@ -984,16 +1114,16 @@
             differ = Math.Abs(pos - creatures(i))
 
             For t = 0 To differ
-                cost = cost + t
+                cost += t
             Next
 
         Next
 
-        calcFuelCost2 = cost
+        CalcFuelCost2 = cost
 
     End Function
 
-    Function sortString(value As String) As String
+    Function SortString(value As String) As String
 
         Dim chars() = value.ToArray
 
