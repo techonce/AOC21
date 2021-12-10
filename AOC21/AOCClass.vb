@@ -832,7 +832,6 @@
         Dim inputStrings(1000) As String
         Dim IsLow(,) As Boolean, currentBasin As Integer
 
-
         Dim answer As Int64
 
         stringreader = filereader.ReadLine()
@@ -954,6 +953,147 @@
         End If
     End Function
 
+    Function Day10(part As Int16) As Int64
+
+        Dim answer As Int64
+        Dim paren As Int16, brack As Int16, brace As Int16, gtlt As Int16
+        Dim noChange As Boolean, strLen As Int16, spot As Int16, target As String, tempSpot As Int16, oldstring As String
+        Dim score() As Int64, c As Integer
+
+        If part = 1 Then
+
+            stringreader = filereader.ReadLine()
+
+            Do While (stringreader IsNot Nothing)
+
+                strLen = Len(stringreader)
+
+                Do Until noChange = True
+                    noChange = True
+                    oldstring = stringreader.Clone()
+                    For t = 1 To 4
+                        Select Case t
+                            Case 1
+                                target = "()"
+                            Case 2
+                                target = "[]"
+                            Case 3
+                                target = "{}"
+                            Case 4
+                                target = "<>"
+                            Case Else
+                                target = ""
+                        End Select
+
+                        oldstring = Replace(oldstring, target, "")
+                    Next
+
+                    If stringreader = oldstring Then
+                        noChange = True
+                    Else
+                        noChange = False
+                        stringreader = oldstring
+                    End If
+
+                Loop
+
+                noChange = False
+
+                stringreader = Replace(stringreader, "(", "")
+                stringreader = Replace(stringreader, "[", "")
+                stringreader = Replace(stringreader, "{", "")
+                stringreader = Replace(stringreader, "<", "")
+
+                If Len(stringreader) > 0 Then
+                    Select Case Left(stringreader, 1)
+                        Case ")"
+                            answer += 3
+                        Case "]"
+                            answer += 57
+                        Case "}"
+                            answer += 1197
+                        Case ">"
+                            answer += 25137
+                    End Select
+                End If
+
+                stringreader = filereader.ReadLine()
+
+            Loop
+
+            Day10 = answer
+        Else
+            c = 0
+            stringreader = filereader.ReadLine()
+
+            Do While (stringreader IsNot Nothing)
+
+                strLen = Len(stringreader)
+
+                Do Until noChange = True
+                    noChange = True
+                    oldstring = stringreader.Clone()
+                    For t = 1 To 4
+                        Select Case t
+                            Case 1
+                                target = "()"
+                            Case 2
+                                target = "[]"
+                            Case 3
+                                target = "{}"
+                            Case 4
+                                target = "<>"
+                            Case Else
+                                target = ""
+                        End Select
+
+                        oldstring = Replace(oldstring, target, "")
+                    Next
+
+                    If stringreader = oldstring Then
+                        noChange = True
+                    Else
+                        noChange = False
+                        stringreader = oldstring
+                    End If
+
+                Loop
+
+                noChange = False
+
+                If stringreader.Contains(")") Or stringreader.Contains(">") Or stringreader.Contains("]") Or stringreader.Contains("}") Then
+                Else
+                    stringreader = StrReverse(stringreader)
+                    ReDim Preserve score(c)
+                    score(c) = 0
+                    For t = 1 To Len(stringreader)
+                        score(c) *= 5
+                        Select Case Mid(stringreader, t, 1)
+                            Case "("
+                                score(c) += 1
+                            Case "["
+                                score(c) += 2
+                            Case "{"
+                                score(c) += 3
+                            Case "<"
+                                score(c) += 4
+                        End Select
+                    Next
+                    c = c + 1
+                End If
+
+                stringreader = filereader.ReadLine()
+
+            Loop
+
+            Array.Sort(score)
+
+            answer = score((score.Length - 1) / 2)
+
+            Day10 = answer
+
+        End If
+    End Function
 
     Function Dayx(part As Int16) As Int64
 
