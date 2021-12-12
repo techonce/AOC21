@@ -1,11 +1,18 @@
 ﻿Class AOCClass
     Public basins(1000) As Integer
+    Public flashes As Int16
+    Public cavePaths As List(Of List(Of String))
 
     Structure StrucBoard
         Public ID As Integer
         Public grid(,) As Integer
         Public marked(,) As Boolean
         Public eliminated As Boolean
+    End Structure
+
+    Structure strucCave
+        Public ID As String
+        Public CaveExits As List(Of String)
     End Structure
 
     Structure Vector2
@@ -956,8 +963,7 @@
     Function Day10(part As Int16) As Int64
 
         Dim answer As Int64
-        Dim paren As Int16, brack As Int16, brace As Int16, gtlt As Int16
-        Dim noChange As Boolean, strLen As Int16, spot As Int16, target As String, tempSpot As Int16, oldstring As String
+        Dim noChange As Boolean, strLen As Int16, target As String, oldstring As String
         Dim score() As Int64, c As Integer
 
         If part = 1 Then
@@ -1095,6 +1101,147 @@
         End If
     End Function
 
+    Function Day11(part As Int16) As Int64
+
+        Dim octopus(,) As Int16, r As Int16, c As Int16, stringinput(9) As String
+        Dim answer As Int64, simDay As Int16
+
+        stringreader = filereader.ReadLine()
+
+        r = 0
+        c = Len(stringreader)
+
+        Do While (stringreader IsNot Nothing)
+
+            stringinput(r) = stringreader
+            r += 1
+            stringreader = filereader.ReadLine()
+
+        Loop
+
+        ReDim octopus(r - 1, c - 1)
+
+        For r = 0 To UBound(octopus, 1)
+            For c = 0 To UBound(octopus, 2)
+                octopus(r, c) = Val(Mid(stringinput(r), c + 1, 1))
+            Next
+        Next
+
+        If part = 1 Then
+
+            For SimDay = 1 To 100
+
+                For r = 0 To UBound(octopus, 1)
+                    For c = 0 To UBound(octopus, 2)
+                        octopus(r, c) += 1
+                    Next
+                Next
+
+                For r = 0 To UBound(octopus, 1)
+                    For c = 0 To UBound(octopus, 2)
+
+                        octoFlash(octopus, r, c)
+
+                    Next
+                Next
+            Next
+
+            answer = flashes
+
+            Day11 = answer
+        Else
+
+            simDay = 0
+
+            Do Until arraySum(octopus) = 0
+                simday += 1
+
+                For r = 0 To UBound(octopus, 1)
+                    For c = 0 To UBound(octopus, 2)
+                        octopus(r, c) += 1
+                    Next
+                Next
+
+                For r = 0 To UBound(octopus, 1)
+                    For c = 0 To UBound(octopus, 2)
+
+                        octoFlash(octopus, r, c)
+
+                    Next
+                Next
+            Loop
+
+            answer = simday
+
+            Day11 = answer
+
+        End If
+    End Function
+
+    Function Day12(part As Int16) As Int64
+
+        Dim stringinput(1000) As String
+        Dim answer As Int64, r As Int16, spot As Int16, tcave(1) As String
+        Dim caves As Dictionary(Of String, strucCave), tempcave As strucCave, tempPath As String
+        Dim currPath As List(Of String)
+
+        stringreader = filereader.ReadLine()
+
+        Do While (stringreader IsNot Nothing)
+
+            stringinput(r) = stringreader
+            r += 1
+            stringreader = filereader.ReadLine()
+
+        Loop
+
+        ReDim Preserve stringinput(r - 1)
+
+        caves = New Dictionary(Of String, strucCave)
+
+        For t = 0 To r - 1
+
+            spot = InStr(stringinput(t), "-")
+            tcave(0) = Left(stringinput(t), spot - 1)
+            tcave(1) = Mid(stringinput(t), spot + 1, 100)
+
+            For u = 0 To 1
+
+                If caves.ContainsKey(tcave(u)) Then
+                    caves(tcave(u)).CaveExits.Add(tcave(1 - u))
+                Else
+                    tempcave = New strucCave
+                    tempcave.ID = tcave(u)
+                    tempcave.CaveExits = New List(Of String)
+                    tempcave.CaveExits.Add(tcave(1 - u))
+
+                    caves.Add(tempcave.ID, tempcave)
+                End If
+
+            Next
+
+        Next
+
+        If part = 1 Then
+
+            currPath = New List(Of String)
+            currPath.Add("start")
+            cavePaths = New List(Of List(Of String))
+
+            findNeighbors(caves, currPath, caves("start"))
+
+            answer = cavePaths.Count
+
+            Day12 = answer
+
+        Else
+
+            Day12 = answer
+
+        End If
+    End Function
+
+
     Function Dayx(part As Int16) As Int64
 
 
@@ -1130,6 +1277,130 @@
 
 
     ' *************  Put all real Functions Below this line
+
+    Sub findNeighbors(ByRef caves As Dictionary(Of String, strucCave), ByVal currentPath As List(Of String), currentCave As strucCave)
+
+        Dim temppath As List(Of String), temptext As String
+
+        For t = 0 To currentCave.CaveExits.Count - 1
+
+            temptext = List2String(currentPath)
+            Console.WriteLine(temptext & " going to try " & currentCave.CaveExits(t))
+
+            If currentCave.CaveExits(t) = "end" Then
+
+                Console.WriteLine("     -found end")
+
+                currentPath.Add(currentCave.CaveExits(t))
+                temppath = New List(Of String)
+                temppath = currentPath.ToList()
+                cavePaths.Add(temppath)
+                currentPath.RemoveAt(currentPath.Count - 1)
+
+            ElseIf currentCave.CaveExits(t) = "start" Then
+
+                'temptext = ListtoString(currentPath)
+
+                Console.WriteLine("      -tried to go back to start")
+
+            ElseIf currentPath.Contains(currentCave.CaveExits(t)) And LCase(currentCave.CaveExits(t)) = currentCave.CaveExits(t) Then
+
+                'temptext = ListtoString(currentPath)
+
+                Console.WriteLine("     -tried to visit lower case again.")
+
+            Else
+                'temptext = ListtoString(currentPath)
+
+                'Console.WriteLine(temptext & "  going down path " & currentCave.CaveExits(t) & ".")
+
+                currentPath.Add(currentCave.CaveExits(t))
+                findNeighbors(caves, currentPath, caves(currentCave.CaveExits(t)))
+
+                Console.WriteLine("    - Stepping back")
+
+                currentPath.RemoveAt(currentPath.Count - 1)
+
+            End If
+        Next
+    End Sub
+
+    Sub findNeighbors2(ByRef caves As Dictionary(Of String, strucCave), ByVal currentPath As List(Of String), currentCave As strucCave)
+
+        Dim temppath As List(Of String), temptext As String
+
+        For t = 0 To currentCave.CaveExits.Count - 1
+
+            temptext = List2String(currentPath)
+            Console.WriteLine(temptext & " going to try " & currentCave.CaveExits(t))
+
+            If currentCave.CaveExits(t) = "end" Then
+
+                Console.WriteLine("     -found end")
+
+                currentPath.Add(currentCave.CaveExits(t))
+                temppath = New List(Of String)
+                temppath = currentPath.ToList()
+                cavePaths.Add(temppath)
+                currentPath.RemoveAt(currentPath.Count - 1)
+
+            ElseIf currentCave.CaveExits(t) = "start" Then
+
+                'temptext = ListtoString(currentPath)
+
+                Console.WriteLine("      -tried to go back to start")
+
+            ElseIf currentPath.Contains(currentCave.CaveExits(t)) And LCase(currentCave.CaveExits(t)) = currentCave.CaveExits(t) Then
+
+                'temptext = ListtoString(currentPath)
+
+                Console.WriteLine("     -tried to visit lower case again.")
+
+            Else
+                'temptext = ListtoString(currentPath)
+
+                'Console.WriteLine(temptext & "  going down path " & currentCave.CaveExits(t) & ".")
+
+                currentPath.Add(currentCave.CaveExits(t))
+                findNeighbors2(caves, currentPath, caves(currentCave.CaveExits(t)))
+
+                Console.WriteLine("    - Stepping back")
+
+                currentPath.RemoveAt(currentPath.Count - 1)
+
+            End If
+
+        Next
+
+    End Sub
+
+    Function List2String(inList As List(Of String)) As String
+
+        For t = 0 To inList.Count - 1
+            List2String &= inList(t) & ","
+        Next
+
+    End Function
+
+    Sub octoFlash(ByRef octopus(,) As Int16, r As Int16, c As Int16)
+
+        If octopus(r, c) > 9 Then
+            flashes += 1
+            octopus(r, c) = 0
+
+            For r2 = r - 1 To r + 1
+                For c2 = c - 1 To c + 1
+                    If r2 >= 0 And r2 <= UBound(octopus, 1) And c2 >= 0 And c2 <= UBound(octopus, 2) And (r2 <> r Or c2 <> c) Then
+                        If octopus(r2, c2) <> 0 Then
+                            octopus(r2, c2) += 1
+                            octoFlash(octopus, r2, c2)
+                        End If
+                    End If
+                Next
+            Next
+        End If
+
+    End Sub
 
     Sub CheckNeighbors(ByRef grid(,) As Integer, r As Integer, c As Integer, currentbasin As Integer)
 
@@ -1281,6 +1552,16 @@
 
         End If
 
+    End Function
+
+    Function arraySum(value(,) As Int16) As Int16
+        For r = 0 To UBound(value, 1)
+            For c = 0 To UBound(value, 2)
+                arraySum += value(r, c)
+            Next
+        Next
+
+        Return arraySum
     End Function
 
     Function IsSubset(value As String, subset As String) As Boolean

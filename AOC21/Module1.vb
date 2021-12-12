@@ -10,8 +10,8 @@ Module Module1
 
     Sub Main()
 
-        day = 10
-        part = 2
+        day = 12
+        part = 1
         UseActual = False
         UseActual = True
 
