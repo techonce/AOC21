@@ -1236,10 +1236,208 @@
 
         Else
 
+            currPath = New List(Of String)
+            currPath.Add("start")
+            cavePaths = New List(Of List(Of String))
+
+            findNeighbors2(caves, currPath, caves("start"))
+
+            answer = cavePaths.Count
+            Console.WriteLine("")
+            For Each cpath In cavePaths
+                Console.WriteLine(List2String(cpath))
+            Next
+
             Day12 = answer
 
         End If
     End Function
+
+    Function Day13(part As Int16) As Int64
+
+        Dim stringinput(1000) As String
+        Dim rules(50) As String
+        Dim grid(,) As Int64, r As Int16, spot As Int16, maxX As Int64, maxy As Int64
+        Dim tempX As Int16, tempY As Int16
+        Dim answer As Int64
+        Dim tempgrid(,) As Int64, foldline As Int64
+
+        stringreader = filereader.ReadLine()
+
+        Do While (stringreader IsNot "")
+
+            stringinput(r) = stringreader
+            r += 1
+            stringreader = filereader.ReadLine()
+
+        Loop
+
+        ReDim Preserve stringinput(r - 1)
+
+        stringreader = filereader.ReadLine()
+
+        r = 0
+
+        Do While (stringreader IsNot Nothing)
+
+            rules(r) = stringreader
+            r += 1
+            stringreader = filereader.ReadLine()
+
+        Loop
+
+        ReDim Preserve rules(r - 1)
+
+        For t = 0 To stringinput.Length - 1
+
+            spot = InStr(stringinput(t), ",")
+
+            tempX = Val(Left(stringinput(t), spot - 1))
+            tempY = Val(Mid(stringinput(t), spot + 1, 10))
+
+            If tempX > maxX Then maxX = tempX
+            If tempY > maxy Then maxy = tempY
+
+        Next
+
+        ReDim Preserve grid(maxX, maxy)
+
+        For t = 0 To stringinput.Length - 1
+
+            spot = InStr(stringinput(t), ",")
+
+            tempX = Val(Left(stringinput(t), spot - 1))
+            tempY = Val(Mid(stringinput(t), spot + 1, 10))
+
+            grid(tempX, tempY) = 1
+
+        Next
+
+
+        ReDim Preserve grid(maxX, maxy)
+
+        If part = 1 Then
+
+            For r = 0 To 0 'rules.Length - 1
+                spot = InStr(rules(r), "=")
+                If Mid(rules(r), spot - 1, 1) = "x" Then
+                    foldline = Val(Mid(rules(r), spot + 1, 10))
+                    ReDim tempgrid(foldline - 1, UBound(grid, 2))
+                    For x = 0 To foldline - 1
+                        For y = 0 To UBound(grid, 2)
+                            tempgrid(x, y) = grid(x, y)
+                        Next
+                    Next
+
+                    For x = foldline + 1 To UBound(grid, 1)
+                        For y = 0 To UBound(grid, 2)
+                            tempgrid(2 * foldline - x, y) += grid(x, y)
+                        Next
+                    Next
+
+                    ReDim grid(UBound(tempgrid, 1), UBound(tempgrid, 2))
+
+                    grid = tempgrid.Clone()
+
+                Else
+                    foldline = Val(Mid(rules(r), spot + 1, 10))
+                    ReDim tempgrid(UBound(grid, 1), foldline - 1)
+                    For y = 0 To foldline - 1
+                        For x = 0 To UBound(grid, 1)
+                            tempgrid(x, y) = grid(x, y)
+                        Next
+                    Next
+
+                    For y = foldline + 1 To UBound(grid, 2)
+                        For x = 0 To UBound(grid, 1)
+                            tempgrid(x, 2 * foldline - y) += grid(x, y)
+                        Next
+                    Next
+
+                    ReDim grid(UBound(tempgrid, 1), UBound(tempgrid, 2))
+
+                    grid = tempgrid.Clone()
+                End If
+
+            Next
+
+            For x = 0 To UBound(grid, 1)
+                For y = 0 To UBound(grid, 2)
+                    If grid(x, y) > 0 Then answer += 1
+                Next
+            Next
+
+            Day13 = answer
+        Else
+            For r = 0 To rules.Length - 1
+                spot = InStr(rules(r), "=")
+                If Mid(rules(r), spot - 1, 1) = "x" Then
+                    foldline = Val(Mid(rules(r), spot + 1, 10))
+                    ReDim tempgrid(foldline - 1, UBound(grid, 2))
+                    For x = 0 To foldline - 1
+                        For y = 0 To UBound(grid, 2)
+                            tempgrid(x, y) = grid(x, y)
+                        Next
+                    Next
+
+                    For x = foldline + 1 To UBound(grid, 1)
+                        For y = 0 To UBound(grid, 2)
+                            tempgrid(2 * foldline - x, y) += grid(x, y)
+                        Next
+                    Next
+
+                    ReDim grid(UBound(tempgrid, 1), UBound(tempgrid, 2))
+
+                    grid = tempgrid.Clone()
+
+                Else
+                    foldline = Val(Mid(rules(r), spot + 1, 10))
+                    ReDim tempgrid(UBound(grid, 1), foldline - 1)
+                    For y = 0 To foldline - 1
+                        For x = 0 To UBound(grid, 1)
+                            tempgrid(x, y) = grid(x, y)
+                        Next
+                    Next
+
+                    For y = foldline + 1 To UBound(grid, 2)
+                        For x = 0 To UBound(grid, 1)
+                            tempgrid(x, 2 * foldline - y) += grid(x, y)
+                        Next
+                    Next
+
+                    ReDim grid(UBound(tempgrid, 1), UBound(tempgrid, 2))
+
+                    grid = tempgrid.Clone()
+                End If
+
+            Next
+
+            For x = 0 To UBound(grid, 1)
+                For y = 0 To UBound(grid, 2)
+                    If grid(x, y) > 0 Then answer += 1
+                Next
+            Next
+
+            Dim tempstring As String
+
+            For x = 0 To UBound(grid, 1)
+                tempstring = ""
+                For y = 0 To UBound(grid, 2)
+                    If grid(x, y) = 0 Then
+                        tempstring &= "."
+                    Else
+                        tempstring &= "#"
+                    End If
+                Next
+                Console.WriteLine(tempstring)
+            Next
+
+
+            Day13 = answer
+
+        End If
+    End Function
+
 
 
     Function Dayx(part As Int16) As Int64
@@ -1328,6 +1526,7 @@
     Sub findNeighbors2(ByRef caves As Dictionary(Of String, strucCave), ByVal currentPath As List(Of String), currentCave As strucCave)
 
         Dim temppath As List(Of String), temptext As String
+        Dim doubleFound As Boolean
 
         For t = 0 To currentCave.CaveExits.Count - 1
 
@@ -1350,11 +1549,51 @@
 
                 Console.WriteLine("      -tried to go back to start")
 
-            ElseIf currentPath.Contains(currentCave.CaveExits(t)) And LCase(currentCave.CaveExits(t)) = currentCave.CaveExits(t) Then
+            ElseIf LCase(currentCave.CaveExits(t)) = currentCave.CaveExits(t) Then
+
+                doubleFound = False
+
+                If currentPath.Contains(currentCave.CaveExits(t)) Then
+
+                    ' find other doubles
+
+                    'temppath = New List(Of String)
+                    'temppath = currentPath.ToList()
+                    For Each tcave In currentPath
+                        If LCase(tcave) = tcave Then
+                            If tcave = currentCave.CaveExits(t) Then
+                                If CountOf(currentPath, tcave) > 1 Then
+                                    doubleFound = True
+                                    Console.WriteLine("     -tried to visit lower case for a third time.")
+                                    Exit For
+                                End If
+                            Else
+                                If CountOf(currentPath, tcave) > 1 Then
+                                    doubleFound = True
+                                    Console.WriteLine("     -tried to visit lower for a second time, but had already seen " & tcave & " twice.")
+                                    Exit For
+                                End If
+                            End If
+                        End If
+                    Next
+
+                End If
+
+                If doubleFound Then
+
+                Else
+                    currentPath.Add(currentCave.CaveExits(t))
+                    findNeighbors2(caves, currentPath, caves(currentCave.CaveExits(t)))
+
+                    Console.WriteLine("    - Stepping back")
+
+                    currentPath.RemoveAt(currentPath.Count - 1)
+
+                End If
 
                 'temptext = ListtoString(currentPath)
 
-                Console.WriteLine("     -tried to visit lower case again.")
+                'Console.WriteLine("     -tried to visit lower case again.")
 
             Else
                 'temptext = ListtoString(currentPath)
@@ -1574,6 +1813,16 @@
 
         Return True
 
+    End Function
+
+    Function CountOf(lst As List(Of String), value As String) As Int16
+        Dim answer As Int16
+
+        For Each item In lst
+            If item = value Then answer += 1
+        Next
+
+        Return answer
     End Function
 
 End Class

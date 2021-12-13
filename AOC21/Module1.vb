@@ -11,7 +11,7 @@ Module Module1
     Sub Main()
 
         day = 12
-        part = 1
+        part = 2
         UseActual = False
         UseActual = True
 
