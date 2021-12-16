@@ -1438,7 +1438,114 @@
         End If
     End Function
 
+    Function Day14(part As Int16) As Int64
 
+        Dim answer As Int64
+        Dim PolyTemp As String, t As Int64
+        Dim PairInsertions As Dictionary(Of String, String)
+        Dim newFormula As String, currentFormula As String, activePair As String, score As Dictionary(Of String, Int16)
+        Dim tempString As String
+
+        stringreader = filereader.ReadLine()
+        PolyTemp = stringreader
+
+        stringreader = filereader.ReadLine()
+        stringreader = filereader.ReadLine()
+
+        PairInsertions = New Dictionary(Of String, String)
+
+        Do While (stringreader IsNot Nothing)
+            PairInsertions.Add(Left(stringreader, 2), Right(stringreader, 1))
+            stringreader = filereader.ReadLine()
+        Loop
+
+
+
+        currentFormula = PolyTemp
+
+        If part = 1 Then
+
+            For d = 1 To 10
+                newFormula = Left(currentFormula, 1)
+                For t = 1 To Len(currentFormula) - 1
+                    activePair = Mid(currentFormula, t, 2)
+                    newFormula &= PairInsertions(activePair) & Right(activePair, 1)
+                Next
+                currentFormula = newFormula
+                newFormula = ""
+            Next
+
+        Else
+
+            For d = 1 To 40
+                Console.WriteLine("Day: " & d)
+                newFormula = Left(currentFormula, 1)
+                For t = 1 To Len(currentFormula) - 1
+                    activePair = Mid(currentFormula, t, 2)
+                    newFormula &= PairInsertions(activePair) & Right(activePair, 1)
+                Next
+                currentFormula = newFormula
+                newFormula = ""
+            Next
+
+        End If
+
+        score = New Dictionary(Of String, Short)
+
+
+        For t = 1 To Len(currentFormula)
+                tempString = Mid(currentFormula, t, 1)
+                If score.ContainsKey(tempString) Then
+                    score(tempString) += 1
+                Else
+                    score.Add(tempString, 1)
+                End If
+            Next
+
+            Dim smax As Int16 = 1
+            Dim smin As Int16 = 10000
+
+            For Each scoreItem In score
+                If scoreItem.Value > smax Then smax = scoreItem.Value
+                If scoreItem.Value < smin Then smin = scoreItem.Value
+            Next
+
+            Day14 = smax - smin
+
+    End Function
+
+    Function Day15(part As Int16) As Int64
+
+
+        Dim answer As Int64
+
+        If part = 1 Then
+
+            stringreader = filereader.ReadLine()
+
+            Do While (stringreader IsNot Nothing)
+
+
+
+                stringreader = filereader.ReadLine()
+
+            Loop
+
+            Day15 = answer
+        Else
+            stringreader = filereader.ReadLine()
+
+            Do While (stringreader IsNot Nothing)
+
+
+
+                stringreader = filereader.ReadLine()
+            Loop
+
+            Day15 = answer
+
+        End If
+    End Function
 
     Function Dayx(part As Int16) As Int64
 
