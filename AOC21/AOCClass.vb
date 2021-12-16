@@ -1438,7 +1438,207 @@
         End If
     End Function
 
+    Function Day14(part As Int16) As Int64
 
+        Dim answer As Int64
+        Dim PolyTemp As String, t As Int64
+        Dim PairInsertions As Dictionary(Of String, String)
+        Dim newFormula As String, currentFormula As String, activePair As String, score As Dictionary(Of String, Int16)
+        Dim tempString As String
+
+        stringreader = filereader.ReadLine()
+        PolyTemp = stringreader
+
+        stringreader = filereader.ReadLine()
+        stringreader = filereader.ReadLine()
+
+        PairInsertions = New Dictionary(Of String, String)
+
+        Do While (stringreader IsNot Nothing)
+            PairInsertions.Add(Left(stringreader, 2), Right(stringreader, 1))
+            stringreader = filereader.ReadLine()
+        Loop
+
+
+
+        currentFormula = PolyTemp
+
+        If part = 1 Then
+
+            For d = 1 To 10
+                newFormula = Left(currentFormula, 1)
+                For t = 1 To Len(currentFormula) - 1
+                    activePair = Mid(currentFormula, t, 2)
+                    newFormula &= PairInsertions(activePair) & Right(activePair, 1)
+                Next
+                currentFormula = newFormula
+                newFormula = ""
+            Next
+
+        Else
+
+            For d = 1 To 40
+                Console.WriteLine("Day: " & d)
+                newFormula = Left(currentFormula, 1)
+                For t = 1 To Len(currentFormula) - 1
+                    activePair = Mid(currentFormula, t, 2)
+                    newFormula &= PairInsertions(activePair) & Right(activePair, 1)
+                Next
+                currentFormula = newFormula
+                newFormula = ""
+            Next
+
+        End If
+
+        score = New Dictionary(Of String, Short)
+
+
+        For t = 1 To Len(currentFormula)
+            tempString = Mid(currentFormula, t, 1)
+            If score.ContainsKey(tempString) Then
+                score(tempString) += 1
+            Else
+                score.Add(tempString, 1)
+            End If
+        Next
+
+        Dim smax As Int16 = 1
+        Dim smin As Int16 = 10000
+
+        For Each scoreItem In score
+            If scoreItem.Value > smax Then smax = scoreItem.Value
+            If scoreItem.Value < smin Then smin = scoreItem.Value
+        Next
+
+        Day14 = smax - smin
+
+    End Function
+
+    Function Day15(part As Int16) As Int64
+
+
+        Dim answer As Int64
+
+        If part = 1 Then
+
+            stringreader = filereader.ReadLine()
+
+            Do While (stringreader IsNot Nothing)
+
+
+
+                stringreader = filereader.ReadLine()
+
+            Loop
+
+            Day15 = answer
+        Else
+            stringreader = filereader.ReadLine()
+
+            Do While (stringreader IsNot Nothing)
+
+
+
+                stringreader = filereader.ReadLine()
+            Loop
+
+            Day15 = answer
+
+        End If
+    End Function
+
+    Function Day17(part As Int16) As Int64
+
+        Dim answer As Int64
+        Dim pos As Vector2
+        Dim velocity As Vector2
+        Dim tarxmin As Int64, tarymin As Int64
+        Dim tarxmax As Int64, tarymax As Int64
+        Dim spot As Int64, spot2 As Int64, spot3 As Int64, spot4 As Int64, spot5 As Int64
+        Dim heightmax As Int64, InTarget As Boolean, tempvec As Vector2
+        Dim drag As Int64
+        Dim gravity As Int64
+        Dim goodShots As Int16
+
+        stringreader = filereader.ReadLine()
+
+        spot = InStr(stringreader, "x=")
+        spot2 = InStr(stringreader, "..")
+        spot3 = InStr(stringreader, ",")
+        spot4 = InStr(stringreader, "y=")
+        spot5 = InStr(Mid(stringreader, spot4, 10), "..") + spot4
+
+        tarxmin = Val(Mid(stringreader, spot + 2, spot2 - spot - 1))
+        tarxmax = Val(Mid(stringreader, spot2 + 2, spot3 - spot2 - 1))
+        tarymin = Val(Mid(stringreader, spot4 + 2, spot5 - spot4 - 1))
+        tarymax = Val(Right(stringreader, Len(stringreader) - spot5))
+
+        If tarymin > tarymax Then
+            tempvec = swap(tarymax, tarymin)
+            tarymin = tempvec.x
+            tarymax = tempvec.y
+        End If
+
+        If tarxmin > tarxmax Then
+            tempvec = swap(tarxmax, tarxmin)
+            tarxmin = tempvec.x
+            tarxmax = tempvec.y
+        End If
+
+
+
+        drag = -1
+        gravity = -1
+
+        For velspx = 1 To tarxmax
+            For velspy = tarymin To 10000
+
+                InTarget = False
+                velocity.x = velspx
+                velocity.y = velspy
+                heightmax = 0
+                pos.x = 0
+                pos.y = 0
+
+
+
+
+                Do Until InTarget = True Or pos.y < tarymin Or pos.x > tarxmax
+
+                    pos.x += velocity.x
+
+                    pos.y += velocity.y
+
+                    If pos.x >= tarxmin And pos.x <= tarxmax And pos.y <= tarymax And pos.y >= tarymin Then
+                        Console.WriteLine("Used vx= " & velspx & " vy= " & velspy)
+                        Console.WriteLine(" hit.  Max height = " & heightmax)
+                        goodShots += 1
+                        InTarget = True
+                        If heightmax > answer Then answer = heightmax
+                    End If
+
+                    If pos.y > heightmax Then heightmax = pos.y
+
+                    velocity.y += gravity
+
+                    If velocity.x > 0 Then
+                        velocity.x += drag
+                    ElseIf velocity.x < 0 Then
+                        velocity.x -= drag
+                    End If
+
+                Loop
+
+            Next
+        Next
+        If part = 1 Then
+            Day17 = answer
+        Else
+
+            Day17 = goodShots
+
+        End If
+    End Function
 
     Function Dayx(part As Int16) As Int64
 
@@ -1824,5 +2024,13 @@
 
         Return answer
     End Function
+
+    Function swap(v1 As Int64, v2 As Int64) As Vector2
+
+        swap.x = v2
+        swap.y = v1
+
+    End Function
+
 
 End Class

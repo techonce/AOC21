@@ -10,15 +10,15 @@ Module Module1
 
     Sub Main()
 
-        day = 12
+        day = 17
         part = 2
         UseActual = False
         UseActual = True
 
         If UseActual Then
-            dataFileName = "C:\Users\jyani\source\repos\AOC21\AOC21\data_" & day & ".txt"
+            dataFileName = "C:\Users\jyani\source\repos\AOC21\AOC21\" & "data_" & day & ".txt"
         Else
-            dataFileName = "C:\Users\jyani\source\repos\AOC21\AOC21\sample_" & day & ".txt"
+            dataFileName = "C:\Users\jyani\source\repos\AOC21\AOC21\" & "sample_" & day & ".txt"
         End If
 
         filereader = My.Computer.FileSystem.OpenTextFileReader(dataFileName)
