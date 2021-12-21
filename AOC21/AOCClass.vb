@@ -3,6 +3,16 @@
 	Public flashes As Int16
 	Public cavePaths As List(Of List(Of String))
 
+	Structure SFPair
+		Public IsLeftValue As Boolean
+		Public LeftPair As String
+		Public LeftValue As Int16
+
+		Public IsRightValue As Boolean
+		Public RightPair As String
+		Public RightValue As Int16
+	End Structure
+
 	Structure Packet
 		Public version As Int16
 		Public PType As Int16
@@ -1700,77 +1710,244 @@
 
 	End Function
 
-
-	Function Day16(part As Int16) As Int64
+	Function Day17(part As Int16) As Int64
 
 		Dim answer As Int64
-		Dim trans As String
-		Dim TopPack As Packet
-		Dim LitOper As Int16, cPos As Int16, litString As String, tString As String
+		Dim pos As Vector2
+		Dim velocity As Vector2
+		Dim tarxmin As Int64, tarymin As Int64
+		Dim tarxmax As Int64, tarymax As Int64
+		Dim spot As Int64, spot2 As Int64, spot3 As Int64, spot4 As Int64, spot5 As Int64
+		Dim heightmax As Int64, InTarget As Boolean, tempvec As Vector2
+		Dim drag As Int64
+		Dim gravity As Int64
+		Dim goodShots As Int16
 
-		LitOper = 1
 		stringreader = filereader.ReadLine()
+
+		spot = InStr(stringreader, "x=")
+		spot2 = InStr(stringreader, "..")
+		spot3 = InStr(stringreader, ",")
+		spot4 = InStr(stringreader, "y=")
+		spot5 = InStr(Mid(stringreader, spot4, 10), "..") + spot4
+
+		tarxmin = Val(Mid(stringreader, spot + 2, spot2 - spot - 1))
+		tarxmax = Val(Mid(stringreader, spot2 + 2, spot3 - spot2 - 1))
+		tarymin = Val(Mid(stringreader, spot4 + 2, spot5 - spot4 - 1))
+		tarymax = Val(Right(stringreader, Len(stringreader) - spot5))
+
+		If tarymin > tarymax Then
+			tempvec = swap(tarymax, tarymin)
+			tarymin = tempvec.x
+			tarymax = tempvec.y
+		End If
+
+		If tarxmin > tarxmax Then
+			tempvec = swap(tarxmax, tarxmin)
+			tarxmin = tempvec.x
+			tarxmax = tempvec.y
+		End If
+
+		drag = -1
+		gravity = -1
+
+		For velspx = 1 To tarxmax
+			For velspy = tarymin To 10000
+
+				InTarget = False
+				velocity.x = velspx
+				velocity.y = velspy
+				heightmax = 0
+				pos.x = 0
+				pos.y = 0
+
+				Do Until InTarget = True Or pos.y < tarymin Or pos.x > tarxmax
+
+					pos.x += velocity.x
+
+					pos.y += velocity.y
+
+					If pos.x >= tarxmin And pos.x <= tarxmax And pos.y <= tarymax And pos.y >= tarymin Then
+						Console.WriteLine("Used vx= " & velspx & " vy= " & velspy)
+						Console.WriteLine(" hit.  Max height = " & heightmax)
+						goodShots += 1
+						InTarget = True
+						If heightmax > answer Then answer = heightmax
+					End If
+
+					If pos.y > heightmax Then heightmax = pos.y
+
+					velocity.y += gravity
+
+					If velocity.x > 0 Then
+						velocity.x += drag
+					ElseIf velocity.x < 0 Then
+						velocity.x -= drag
+					End If
+
+				Loop
+			Next
+		Next
+
+		If part = 1 Then
+			Day17 = answer
+		Else
+			Day17 = goodShots
+		End If
+	End Function
+
+	Function Day21(part As Int16) As Int64
+
+		Dim p1pos As Int64
+		Dim p2pos As Int64
+		Dim currentDieNum As Int64
+		Dim p1Score As Int64
+		Dim p2Score As Int64
+		Dim p1Turn As Boolean
+		Dim rollsum As Int64
+		Dim answer As Int64
+
+		p1pos = 1
+		p2pos = 10
+		p1Turn = True
 
 		If part = 1 Then
 
-			trans = Hex2Bin(stringreader)
+			currentDieNum = 0
 
-			TopPack = New Packet
+			Do Until p1Score >= 1000 Or p2Score >= 1000
 
-			With TopPack
-				.version = Bin2Dec(Left(trans, 3))
-				.PType = Bin2Dec(Mid(trans, 4, 3))
+				rollsum = 0
 
-				cPos = 7
+				For t = 1 To 3
+					currentDieNum += 1
+					rollsum += currentDieNum Mod 100
+				Next
 
-				If .PType = 4 Then
-					litString = ""
-
-					Do Until LitOper = 0
-						LitOper = Mid(trans, cPos, 1)
-						cPos += 1
-						litString &= Mid(trans, cPos, 4)
-						cPos += 4
-					Loop
-
-					.LitValue = Bin2Dec(litString)
-
+				If p1Turn Then
+					p1pos += rollsum
+					p1Score += p1pos Mod 10
+					If p1pos Mod 10 = 0 Then p1Score += 10
+					p1Turn = False
 				Else
+					p2pos += rollsum
+					p2Score += p2pos Mod 10
+					If p2pos Mod 10 = 0 Then p2Score += 10
+					p1Turn = True
+				End If
 
-					.LenType = Bin2Dec(Mid(trans, cPos, 1))
-					If .LenType = 0 Then
-						.SubpackLen = Bin2Dec(Mid(trans, cPos + 1, 15))
-						cPos += 15
-					Else
-						For t = 1 To Bin2Dec(Mid(trans, cPos + 1, 11))
+				Do Until LitOper = 0
+				LitOper = Mid(trans, cPos, 1)
+				cPos += 1
+				litString &= Mid(trans, cPos, 4)
+				cPos += 4
+			Loop
 
-						Next
-					End If
+				If p1Turn Then
+					answer = currentDieNum * p1Score
+				Else
+					answer = currentDieNum * p2Score
 
 				End If
 
+				Else
+				Dim tracker As Int64
+				Dim tempscore As Int64
+				Dim targ As Int64
+				Dim gamestate(11, 11, 30, 30)
+				Dim tempstate(11, 11, 30, 30)
 
-			End With
+				' p1 pos, p2 pos, p1 score, p2 score, status (0 - ongoing, 1 - p1 won, 2 - p2 won)
 
+				Dim Possibles(10) As Int64
 
+				Possibles = {0, 0, 0, 1, 3, 6, 7, 6, 3, 1}
 
-			Day16 = answer
-		Else
-			stringreader = filereader.ReadLine()
+				gamestate(1, 10, 0, 0) = 1
 
-			Do While (stringreader IsNot Nothing)
+				tracker = 1
 
+				p1Turn = True
 
+				Do Until tracker = 0
 
-				stringreader = filereader.ReadLine()
-			Loop
+					tracker = 0
 
-			Day16 = answer
+					ReDim tempstate(11, 11, 30, 30)
+
+					For p1s = 0 To 30
+
+						For p2s = 0 To 30
+
+							For p1p = 1 To 10
+
+								For p2p = 1 To 10
+
+									If gamestate(p1p, p2p, p1s, p2s) > 0 Then
+
+										If p1s > 20 Or p2s > 20 Then
+
+											tempstate(p1p, p2p, p1s, p2s) += gamestate(p1p, p2p, p1s, p2s)
+
+										Else
+
+											For r = 3 To 9
+
+												If p1Turn Then
+													targ = p1p + r
+												Else
+													targ = p2p + r
+												End If
+
+												If targ > 10 Then targ -= 10
+
+												tempscore = targ Mod 10
+												If tempscore = 0 Then tempscore = 10
+
+												If p1Turn Then
+													tempstate(targ, p2p, p1s + tempscore, p2s) += gamestate(p1p, p2p, p1s, p2s) * Possibles(r)
+												Else
+													tempstate(p1p, targ, p1s, p2s + tempscore) += gamestate(p1p, p2p, p1s, p2s) * Possibles(r)
+												End If
+
+											Next
+
+											tracker += gamestate(p1p, p2p, p1s, p2s)
+
+										End If
+
+									End If
+								Next
+							Next
+						Next
+					Next
+
+					p1Turn = Not p1Turn
+
+			gamestate = tempstate.Clone
+
+			Console.WriteLine("P1Turn: " & p1Turn)
+			Console.WriteLine("Tracker: " & tracker)
+
+		Loop
+
+		Dayx = answer
+
+				For p1p = 1 To 10
+					For p2p = 1 To 10
+						answer += gamestate(p1p, p2p, p1s, p2s)
+					Next
+				Next
+				Next
+				Next
 
 		End If
 
+		Day21 = answer
+
 
 	End Function
+
 	Function Dayx(part As Int16) As Int64
 
 
@@ -2172,5 +2349,13 @@
 
 		Return answer
 	End Function
+
+	Function swap(v1 As Int64, v2 As Int64) As Vector2
+
+		swap.x = v2
+		swap.y = v1
+
+	End Function
+
 
 End Class
