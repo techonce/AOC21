@@ -11,10 +11,10 @@ Module Module1
 
     Sub Main()
 
-        day = 15
-        part = 2
+        day = 17
+        part = 1
         UseActual = False
-        UseActual = True
+        'UseActual = True
 
         If UseActual Then
             dataFileName = "C:\Users\jyanity\Source\Repos\techonce\AOC21\AOC21\data_" & day & ".txt"
@@ -95,5 +95,7 @@ Module Module1
         Return response
 
     End Function
+
+
 
 End Module

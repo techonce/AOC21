@@ -3,6 +3,15 @@
 	Public flashes As Int16
 	Public cavePaths As List(Of List(Of String))
 
+	Structure Packet
+		Public version As Int16
+		Public PType As Int16
+		Public LenType As Int16
+		Public SubpackLen As Int16
+		Public Subpackets As List(Of Packet)
+		Public LitValue As Int16
+	End Structure
+
 	Structure strucNode
 		Public loc As Vector2
 		Public diff As Int16
@@ -1695,18 +1704,57 @@
 	Function Day17(part As Int16) As Int64
 
 		Dim answer As Int64
+		Dim trans As String
+		Dim TopPack As Packet
+		Dim LitOper As Int16, cPos As Int16, litString As String, tString As String
+
+		LitOper = 1
+		stringreader = filereader.ReadLine()
 
 		If part = 1 Then
 
-			stringreader = filereader.ReadLine()
+			trans = Hex2Bin(stringreader)
 
-			Do While (stringreader IsNot Nothing)
+			TopPack = New Packet
 
-				stringreader = filereader.ReadLine()
+			With TopPack
+				.version = Bin2Dec(Left(trans, 3))
+				.PType = Bin2Dec(Mid(trans, 4, 3))
 
-			Loop
+				cPos = 7
 
-			Dayx = answer
+				If .PType = 4 Then
+					litString = ""
+
+					Do Until LitOper = 0
+						LitOper = Mid(trans, cPos, 1)
+						cPos += 1
+						litString &= Mid(trans, cPos, 4)
+						cPos += 4
+					Loop
+
+					.LitValue = Bin2Dec(litString)
+
+				Else
+
+					.LenType = Bin2Dec(Mid(trans, cPos, 1))
+					If .LenType = 0 Then
+						.SubpackLen = Bin2Dec(Mid(trans, cPos + 1, 15))
+						cPos += 15
+					Else
+						For t = 1 To Bin2Dec(Mid(trans, cPos + 1, 11))
+
+						Next
+					End If
+
+				End If
+
+
+			End With
+
+
+
+			Day17 = answer
 		Else
 			stringreader = filereader.ReadLine()
 
@@ -1717,7 +1765,7 @@
 				stringreader = filereader.ReadLine()
 			Loop
 
-			Dayx = answer
+			Day17 = answer
 
 		End If
 
