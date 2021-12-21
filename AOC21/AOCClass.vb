@@ -1148,7 +1148,7 @@
 
 		If part = 1 Then
 
-			For SimDay = 1 To 100
+			For simDay = 1 To 100
 
 				For r = 0 To UBound(octopus, 1)
 					For c = 0 To UBound(octopus, 2)
@@ -1173,7 +1173,7 @@
 			simDay = 0
 
 			Do Until arraySum(octopus) = 0
-				simday += 1
+				simDay += 1
 
 				For r = 0 To UBound(octopus, 1)
 					For c = 0 To UBound(octopus, 2)
@@ -1190,7 +1190,7 @@
 				Next
 			Loop
 
-			answer = simday
+			answer = simDay
 
 			Day11 = answer
 
@@ -1510,23 +1510,23 @@
 		score = New Dictionary(Of String, Short)
 
 		For t = 1 To Len(currentFormula)
-						   tempString = Mid(currentFormula, t, 1)
-							If score.ContainsKey(tempString) Then
-					score(tempString) += 1
-				Else
-					score.Add(tempString, 1)
-				End If
+			tempString = Mid(currentFormula, t, 1)
+			If score.ContainsKey(tempString) Then
+				score(tempString) += 1
+			Else
+				score.Add(tempString, 1)
+			End If
 		Next
 
-			Dim smax As Int16 = 1
-			Dim smin As Int16 = 10000
+		Dim smax As Int16 = 1
+		Dim smin As Int16 = 10000
 
-			For Each scoreItem In score
-				If scoreItem.Value > smax Then smax = scoreItem.Value
-				If scoreItem.Value < smin Then smin = scoreItem.Value
-			Next
+		For Each scoreItem In score
+			If scoreItem.Value > smax Then smax = scoreItem.Value
+			If scoreItem.Value < smin Then smin = scoreItem.Value
+		Next
 
-			Day14 = smax - smin
+		Day14 = smax - smin
 
 	End Function
 
@@ -1669,12 +1669,12 @@
 
 		Loop
 
-			tempvec = goal
+		tempvec = goal
 
 
-			Do Until tempvec.x = 0 And tempvec.y = 0
-				answer += nodes(tempvec).diff
-				tempvec = ClosedList(tempvec).parent
+		Do Until tempvec.x = 0 And tempvec.y = 0
+			answer += nodes(tempvec).diff
+			tempvec = ClosedList(tempvec).parent
 
 		Loop
 
@@ -1701,7 +1701,7 @@
 	End Function
 
 
-	Function Day17(part As Int16) As Int64
+	Function Day16(part As Int16) As Int64
 
 		Dim answer As Int64
 		Dim trans As String
@@ -1754,7 +1754,7 @@
 
 
 
-			Day17 = answer
+			Day16 = answer
 		Else
 			stringreader = filereader.ReadLine()
 
@@ -1765,7 +1765,7 @@
 				stringreader = filereader.ReadLine()
 			Loop
 
-			Day17 = answer
+			Day16 = answer
 
 		End If
 
