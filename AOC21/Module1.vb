@@ -8,18 +8,26 @@ Module Module1
     Dim part As Int16
     Dim dataFileName As String
     Dim UseActual As Boolean
+    Dim AtHome As Boolean
 
     Sub Main()
 
-        day = 17
-        part = 2
+        day = 16
+        part = 1
         UseActual = False
         'UseActual = True
+        AtHome = False
+
+        If AtHome Then
+            dataFileName = "C:\Users\jyani\source\repos\AOC21\AOC21\"
+        Else
+            dataFileName = "C:\Users\jyanity\source\repos\techonce\AOC21\AOC21\"
+        End If
 
         If UseActual Then
-            dataFileName = "C:\Users\jyani\source\repos\AOC21\AOC21\" & "data_" & day & ".txt"
+            dataFileName &= "data_" & day & ".txt"
         Else
-            dataFileName = "C:\Users\jyani\source\repos\AOC21\AOC21\" & "sample_" & day & ".txt"
+            dataFileName &= "sample_" & day & ".txt"
         End If
 
         filereader = My.Computer.FileSystem.OpenTextFileReader(dataFileName)

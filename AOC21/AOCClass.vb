@@ -3,15 +3,6 @@
 	Public flashes As Int16
 	Public cavePaths As List(Of List(Of String))
 
-	Structure SFPair
-		Public IsLeftValue As Boolean
-		Public LeftPair As String
-		Public LeftValue As Int16
-
-		Public IsRightValue As Boolean
-		Public RightPair As String
-		Public RightValue As Int16
-	End Structure
 
 	Structure Packet
 		Public version As Int16
@@ -20,6 +11,17 @@
 		Public SubpackLen As Int16
 		Public Subpackets As List(Of Packet)
 		Public LitValue As Int16
+		Public RemString As String
+	End Structure
+
+	Structure SFPair
+		Public IsLeftValue As Boolean
+		Public LeftPair As String
+		Public LeftValue As Int16
+
+		Public IsRightValue As Boolean
+		Public RightPair As String
+		Public RightValue As Int16
 	End Structure
 
 	Structure strucNode
@@ -1710,6 +1712,42 @@
 
 	End Function
 
+
+	Function Day16(part As Int16) As Int64
+
+		Dim answer As Int64
+		Dim trans As String
+		Dim TopPack As Packet
+		Dim LitOper As Int16, cPos As Int16, litString As String, tString As String
+
+		stringreader = filereader.ReadLine()
+
+		If part = 1 Then
+
+			trans = Hex2Bin(stringreader)
+
+			TopPack = New Packet
+
+			TopPack = TranslatePacket(trans)
+
+			Day16 = answer
+		Else
+			stringreader = filereader.ReadLine()
+
+			Do While (stringreader IsNot Nothing)
+
+
+
+				stringreader = filereader.ReadLine()
+			Loop
+
+			Day16 = answer
+
+		End If
+
+
+	End Function
+
 	Function Day17(part As Int16) As Int64
 
 		Dim answer As Int64
@@ -1835,113 +1873,108 @@
 					If p2pos Mod 10 = 0 Then p2Score += 10
 					p1Turn = True
 				End If
-
-				Do Until LitOper = 0
-				LitOper = Mid(trans, cPos, 1)
-				cPos += 1
-				litString &= Mid(trans, cPos, 4)
-				cPos += 4
 			Loop
 
-				If p1Turn Then
-					answer = currentDieNum * p1Score
-				Else
-					answer = currentDieNum * p2Score
 
-				End If
+			If p1Turn Then
+				answer = currentDieNum * p1Score
+			Else
+				answer = currentDieNum * p2Score
 
-				Else
-				Dim tracker As Int64
-				Dim tempscore As Int64
-				Dim targ As Int64
-				Dim gamestate(11, 11, 30, 30)
-				Dim tempstate(11, 11, 30, 30)
+			End If
 
-				' p1 pos, p2 pos, p1 score, p2 score, status (0 - ongoing, 1 - p1 won, 2 - p2 won)
 
-				Dim Possibles(10) As Int64
+		Else
+			Dim tracker As Int64
+			Dim tempscore As Int64
+			Dim targ As Int64
+			Dim gamestate(11, 11, 30, 30)
+			Dim tempstate(11, 11, 30, 30)
 
-				Possibles = {0, 0, 0, 1, 3, 6, 7, 6, 3, 1}
+			' p1 pos, p2 pos, p1 score, p2 score, status (0 - ongoing, 1 - p1 won, 2 - p2 won)
 
-				gamestate(1, 10, 0, 0) = 1
+			Dim Possibles(10) As Int64
 
-				tracker = 1
+			Possibles = {0, 0, 0, 1, 3, 6, 7, 6, 3, 1}
 
-				p1Turn = True
+			gamestate(1, 10, 0, 0) = 1
 
-				Do Until tracker = 0
+			tracker = 1
 
-					tracker = 0
+			p1Turn = True
 
-					ReDim tempstate(11, 11, 30, 30)
+			Do Until tracker = 0
 
-					For p1s = 0 To 30
+				tracker = 0
 
-						For p2s = 0 To 30
+				ReDim tempstate(11, 11, 30, 30)
 
-							For p1p = 1 To 10
+				For p1s = 0 To 30
 
-								For p2p = 1 To 10
+					For p2s = 0 To 30
 
-									If gamestate(p1p, p2p, p1s, p2s) > 0 Then
+						For p1p = 1 To 10
 
-										If p1s > 20 Or p2s > 20 Then
+							For p2p = 1 To 10
 
-											tempstate(p1p, p2p, p1s, p2s) += gamestate(p1p, p2p, p1s, p2s)
+								If gamestate(p1p, p2p, p1s, p2s) > 0 Then
 
-										Else
+									If p1s > 20 Or p2s > 20 Then
 
-											For r = 3 To 9
+										tempstate(p1p, p2p, p1s, p2s) += gamestate(p1p, p2p, p1s, p2s)
 
-												If p1Turn Then
-													targ = p1p + r
-												Else
-													targ = p2p + r
-												End If
+									Else
 
-												If targ > 10 Then targ -= 10
+										For r = 3 To 9
 
-												tempscore = targ Mod 10
-												If tempscore = 0 Then tempscore = 10
+											If p1Turn Then
+												targ = p1p + r
+											Else
+												targ = p2p + r
+											End If
 
-												If p1Turn Then
-													tempstate(targ, p2p, p1s + tempscore, p2s) += gamestate(p1p, p2p, p1s, p2s) * Possibles(r)
-												Else
-													tempstate(p1p, targ, p1s, p2s + tempscore) += gamestate(p1p, p2p, p1s, p2s) * Possibles(r)
-												End If
+											If targ > 10 Then targ -= 10
 
-											Next
+											tempscore = targ Mod 10
+											If tempscore = 0 Then tempscore = 10
 
-											tracker += gamestate(p1p, p2p, p1s, p2s)
+											If p1Turn Then
+												tempstate(targ, p2p, p1s + tempscore, p2s) += gamestate(p1p, p2p, p1s, p2s) * Possibles(r)
+											Else
+												tempstate(p1p, targ, p1s, p2s + tempscore) += gamestate(p1p, p2p, p1s, p2s) * Possibles(r)
+											End If
 
-										End If
+										Next
+
+										tracker += gamestate(p1p, p2p, p1s, p2s)
 
 									End If
-								Next
+
+								End If
 							Next
 						Next
 					Next
+				Next
 
-					p1Turn = Not p1Turn
+				p1Turn = Not p1Turn
 
-			gamestate = tempstate.Clone
+				gamestate = tempstate.Clone
 
-			Console.WriteLine("P1Turn: " & p1Turn)
-			Console.WriteLine("Tracker: " & tracker)
+				Console.WriteLine("P1Turn: " & p1Turn)
+				Console.WriteLine("Tracker: " & tracker)
 
-		Loop
+			Loop
 
-		Dayx = answer
-
-				For p1p = 1 To 10
-					For p2p = 1 To 10
-						answer += gamestate(p1p, p2p, p1s, p2s)
+				For p1s = 21 To 30
+					For p2s = 1 To 20
+						For p1p = 1 To 10
+							For p2p = 1 To 10
+								answer += gamestate(p1p, p2p, p1s, p2s)
+							Next
+						Next
 					Next
 				Next
-				Next
-				Next
-
-		End If
+        End If
 
 		Day21 = answer
 
@@ -1983,6 +2016,80 @@
 
 
 	' *************  Put all real Functions Below this line
+
+	Function TranslatePacket(value As String) As Packet
+
+		Dim Packet As Packet, SubPack As Packet, cPos As Int16, litString As String, LitOper As Int16, tempStr As String
+		Packet.Subpackets = New List(Of Packet)
+
+		With Packet
+			.version = Bin2Dec(Left(value, 3))
+			value = trimString(value, 3)
+			.PType = Bin2Dec(Left(value, 3))
+			value = trimString(value, 3)
+
+			If .PType = 4 Then
+				litString = ""
+
+				LitOper = 1
+
+				Do Until LitOper = 0
+					LitOper = Left(value, 1)
+					value = trimString(value, 1)
+					litString &= Left(value, 4)
+					value = trimString(value, 4)
+				Loop
+
+				.LitValue = Bin2Dec(litString)
+				If InStr(value, 1) > 0 Then
+					.RemString = value
+				Else
+					.RemString = ""
+				End If
+
+			Else
+
+				.LenType = Bin2Dec(Left(value, 1))
+				value = trimString(value, 1)
+				If .LenType = 0 Then
+					.SubpackLen = Bin2Dec(Left(value, 15))
+					value = trimString(value, 15)
+
+					SubPack = New Packet
+					SubPack = TranslatePacket(Left(value, .SubpackLen))
+					.Subpackets.Add(SubPack)
+
+					tempStr = SubPack.RemString
+
+					Do While tempStr <> ""
+						SubPack = New Packet
+						SubPack = TranslatePacket(tempStr)
+						.Subpackets.Add(SubPack)
+						tempStr = SubPack.RemString
+					Loop
+
+					value = trimString(value, .SubpackLen)
+
+				Else
+					For t = 1 To Bin2Dec(Left(value, 11))
+
+					Next
+				End If
+
+			End If
+
+		End With
+
+		Return Packet
+
+	End Function
+
+	Function trimString(strval As String, value As Int16) As String
+		Dim l As Int16 = Len(strval)
+
+		trimString = Right(strval, l - value)
+
+	End Function
 
 	Sub findNeighbors(ByRef caves As Dictionary(Of String, strucCave), ByVal currentPath As List(Of String), currentCave As strucCave)
 
