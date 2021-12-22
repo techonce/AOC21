@@ -12,11 +12,12 @@ Module Module1
 
     Sub Main()
 
-        day = 16
+        day = 22
         part = 1
         UseActual = False
-        'UseActual = True
-        AtHome = False
+        UseActual = True
+
+        AtHome = True
 
         If AtHome Then
             dataFileName = "C:\Users\jyani\source\repos\AOC21\AOC21\"

@@ -2,15 +2,16 @@
 	Public basins(1000) As Integer
 	Public flashes As Int16
 	Public cavePaths As List(Of List(Of String))
+	Public d16P1Score As Int16
 
 
 	Structure Packet
-		Public version As Int16
-		Public PType As Int16
-		Public LenType As Int16
-		Public SubpackLen As Int16
+		Public version As Int64
+		Public PType As Int64
+		Public LenType As Int64
+		Public SubpackLen As Int64
 		Public Subpackets As List(Of Packet)
-		Public LitValue As Int16
+		Public LitValue As Int64
 		Public RemString As String
 	End Structure
 
@@ -49,6 +50,12 @@
 	Structure Vector2
 		Public x As Int64
 		Public y As Int64
+	End Structure
+
+	Structure Vector3
+		Public x As Int64
+		Public y As Int64
+		Public z As Int64
 	End Structure
 
 	Structure Ray
@@ -1730,7 +1737,7 @@
 
 			TopPack = TranslatePacket(trans)
 
-			Day16 = answer
+			Day16 = d16P1Score
 		Else
 			stringreader = filereader.ReadLine()
 
@@ -1965,18 +1972,99 @@
 
 			Loop
 
-				For p1s = 21 To 30
-					For p2s = 1 To 20
-						For p1p = 1 To 10
-							For p2p = 1 To 10
-								answer += gamestate(p1p, p2p, p1s, p2s)
-							Next
+			For p1s = 21 To 30
+				For p2s = 1 To 20
+					For p1p = 1 To 10
+						For p2p = 1 To 10
+							answer += gamestate(p1p, p2p, p1s, p2s)
 						Next
 					Next
 				Next
-        End If
+			Next
+		End If
 
 		Day21 = answer
+
+
+	End Function
+
+	Function Day22(part As Int16) As Int64
+
+		Dim answer As Int64
+		Dim grid As Dictionary(Of Vector3, Boolean)
+		Dim spot As Int16, OnOff As Boolean, xmin As Int64, xmax As Int64, ymin As Int64, ymax As Int64, zmin As Int64, zmax As Int64
+		Dim v3 As Vector3
+
+		Dim stringreader As String
+
+		stringreader = filereader.ReadLine()
+
+		Do While stringreader IsNot Nothing And stringreader <> ""
+
+			Console.WriteLine(stringreader)
+
+			spot = InStr(stringreader, " ")
+			If Left(stringreader, spot - 1) = "on" Then OnOff = True Else OnOff = False
+			stringreader = trimString(stringreader, spot + 2)
+
+			spot = InStr(stringreader, "..")
+			xmin = Val(Left(stringreader, spot - 1))
+			stringreader = trimString(stringreader, spot + 1)
+			spot = InStr(stringreader, ",")
+			xmax = Val(Left(stringreader, spot - 1))
+			stringreader = trimString(stringreader, spot + 2)
+
+			spot = InStr(stringreader, "..")
+			ymin = Val(Left(stringreader, spot - 1))
+			stringreader = trimString(stringreader, spot + 1)
+			spot = InStr(stringreader, ",")
+			ymax = Val(Left(stringreader, spot - 1))
+			stringreader = trimString(stringreader, spot + 2)
+
+			spot = InStr(stringreader, "..")
+			zmin = Val(Left(stringreader, spot - 1))
+			stringreader = trimString(stringreader, spot + 1)
+
+			zmax = Val(stringreader)
+
+			grid = New Dictionary(Of Vector3, Boolean)
+
+			v3 = New Vector3
+			grid.Add(v3, False)
+
+			If (part = 1) And (xmin > 50 Or xmax < -50 Or ymin > 50 Or ymax < -50 Or zmin > 50 Or zmax < -50) Then
+
+			Else
+
+				For x = xmin To xmax
+					For y = ymin To ymax
+						For z = zmin To zmax
+							v3 = New Vector3
+
+							v3.x = x
+							v3.y = y
+							v3.z = z
+
+							If grid.ContainsKey(v3) Then
+								grid(v3) = OnOff
+							Else
+								grid.Add(v3, OnOff)
+							End If
+
+						Next
+					Next
+				Next
+			End If
+
+			stringreader = filereader.ReadLine()
+		Loop
+
+
+		For Each item In grid
+			If item.Value = True Then answer += 1
+		Next
+
+		Day22 = answer
 
 
 	End Function
@@ -2019,16 +2107,19 @@
 
 	Function TranslatePacket(value As String) As Packet
 
-		Dim Packet As Packet, SubPack As Packet, cPos As Int16, litString As String, LitOper As Int16, tempStr As String
+		Dim Packet As Packet, SubPack As Packet, cPos As Int16, litString As String, LitOper As Int64, tempStr As String
 		Packet.Subpackets = New List(Of Packet)
 
 		With Packet
 			.version = Bin2Dec(Left(value, 3))
+			Console.WriteLine("Version: " & .version & "    Value: " & value)
+			d16P1Score += .version
 			value = trimString(value, 3)
 			.PType = Bin2Dec(Left(value, 3))
 			value = trimString(value, 3)
 
 			If .PType = 4 Then
+				Console.WriteLine("Literal")
 				litString = ""
 
 				LitOper = 1
@@ -2047,16 +2138,20 @@
 					.RemString = ""
 				End If
 
-			Else
+				Console.WriteLine("of value: " & .LitValue & "    Remstring: " & .RemString)
 
+			Else
+				Console.WriteLine("Operator")
 				.LenType = Bin2Dec(Left(value, 1))
 				value = trimString(value, 1)
 				If .LenType = 0 Then
+					Console.WriteLine("    Fixed Length")
 					.SubpackLen = Bin2Dec(Left(value, 15))
 					value = trimString(value, 15)
 
 					SubPack = New Packet
 					SubPack = TranslatePacket(Left(value, .SubpackLen))
+
 					.Subpackets.Add(SubPack)
 
 					tempStr = SubPack.RemString
@@ -2069,10 +2164,19 @@
 					Loop
 
 					value = trimString(value, .SubpackLen)
+					.RemString = value
 
 				Else
-					For t = 1 To Bin2Dec(Left(value, 11))
-
+					Console.WriteLine("     Fixed quantity")
+					.SubpackLen = Bin2Dec(Left(value, 11))
+					value = trimString(value, 11)
+					For t = 1 To .SubpackLen
+						SubPack = New Packet
+						SubPack = TranslatePacket(value)
+						.Subpackets.Add(SubPack)
+						'If SubPack.RemString IsNot Nothing Then
+						value = SubPack.RemString
+						'End If
 					Next
 				End If
 
